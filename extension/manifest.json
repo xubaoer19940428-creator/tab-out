@@ -1,0 +1,25 @@
+{
+  "manifest_version": 3,
+  "name": "Tab Out",
+  "version": "1.3.0",
+  "description": "Keep tabs on your tabs. New tab dashboard with domain grouping, sound/motion controls, i18n, memory saver, and workspace backups.",
+  "permissions": ["tabs", "activeTab", "storage", "favicon"],
+  "host_permissions": [
+    "https://geocoding-api.open-meteo.com/*",
+    "https://api.open-meteo.com/*"
+  ],
+  "chrome_url_overrides": { "newtab": "index.html" },
+  "background": { "service_worker": "background.js" },
+  "action": {
+    "default_title": "Tab Out",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png"
+    }
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
+}

@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tab Out</title>
+
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="container">
+
+
+
+  <!-- ================================================================
+       HEADER — greeting on the left
+       ================================================================ -->
+  <header>
+    <div class="header-left">
+      <!-- "Good afternoon" — written by getGreeting() in app.js -->
+      <h1 id="greeting">Good day</h1>
+      <!-- "Friday, April 4, 2026" — written by getDateDisplay() in app.js -->
+      <div class="date" id="dateDisplay"></div>
+    </div>
+    <div class="header-tools">
+      <button class="command-btn" type="button" data-action="open-command" aria-label="Search tabs, saved items, and workspaces">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m21 21-4.35-4.35m2.1-5.4a7.5 7.5 0 1 1-15 0 7.5 7.5 0 0 1 15 0Z" /></svg>
+        <span>Find anything</span>
+        <kbd>⌘K</kbd>
+      </button>
+      <button class="weather-card" id="weatherCard" type="button" data-action="open-personalize" aria-label="Set up weather">
+        <span class="weather-icon" id="weatherIcon" aria-hidden="true">☀️</span>
+        <span class="weather-copy">
+          <strong id="weatherTemperature">Add weather</strong>
+          <span id="weatherLocation">Choose a city</span>
+        </span>
+      </button>
+      <div class="clock-card" role="timer" aria-label="Local time">
+        <strong id="clockTime">--:--</strong>
+        <span>Local time</span>
+      </div>
+      <button class="personalize-btn" type="button" data-action="open-personalize" aria-label="Personalize Tab Out" title="Personalize">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9.53 16.122a3 3 0 0 0 4.94 0M15 10.5a3 3 0 1 1-6 0m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-4.5-3.75h.008v.008H16.5V6.75Zm-9 0h.008v.008H7.5V6.75Z" />
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- ================================================================
+       TAB OUT DUPES BANNER — appears when you have extra Tab Out tabs open
+       Hidden by default; app.js shows it when dupeTabOutCount > 1
+       ================================================================ -->
+  <div class="tab-cleanup-banner" id="tabOutDupeBanner" style="display:none">
+    <div class="tab-cleanup-left">
+      <div class="tab-cleanup-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 0 1-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 0 1 1.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 0 0-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 0 1-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 0 0-3.375-3.375h-1.5a1.125 1.125 0 0 1-1.125-1.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H9.75" />
+        </svg>
+      </div>
+      <div class="tab-cleanup-text">
+        You have <strong id="tabOutDupeCount"></strong> Tab Out tabs open. Keep just this one?
+      </div>
+    </div>
+    <button class="tab-cleanup-btn" type="button" data-action="close-tabout-dupes">Close extras</button>
+  </div>
+
+  <!-- Saved tab workspaces -->
+  <section class="workspace-shelf" aria-labelledby="workspaceTitle">
+    <div class="workspace-shelf-heading">
+      <div>
+        <span class="workspace-kicker">Saved setups</span>
+        <h2 id="workspaceTitle">Workspaces</h2>
+      </div>
+      <button class="workspace-create-btn" type="button" data-action="open-workspace-form">
+        <span aria-hidden="true">＋</span> Save this desk
+      </button>
+    </div>
+    <form class="workspace-form" id="workspaceForm" hidden>
+      <label for="workspaceName">Workspace name</label>
+      <div class="workspace-form-row">
+        <input id="workspaceName" name="workspaceName" type="text" maxlength="60" autocomplete="off" placeholder="e.g. Monday research">
+        <button type="submit">Save</button>
+        <button type="button" data-action="close-workspace-form">Cancel</button>
+      </div>
+    </form>
+    <div class="workspace-list" id="workspaceList" aria-live="polite"></div>
+  </section>
+
+  <!-- ================================================================
+       MAIN CONTENT AREA — two-column layout
+       Left: open tabs (domain/mission cards)
+       Right: saved for later checklist
+       The right column only renders when it has items (JS controls this)
+       ================================================================ -->
+  <div class="dashboard-columns" id="dashboardColumns">
+
+    <!-- LEFT COLUMN: Open tabs -->
+    <div class="active-section" id="openTabsSection" style="display:none">
+      <div class="section-header">
+        <h2 id="openTabsSectionTitle">Right now</h2>
+        <div class="section-line"></div>
+        <div class="section-count" id="openTabsSectionCount"></div>
+      </div>
+      <div class="missions" id="openTabsMissions"></div>
+    </div>
+
+    <!-- RIGHT COLUMN: Saved for Later checklist -->
+    <div class="deferred-column" id="deferredColumn" style="display:none">
+      <div class="section-header">
+        <h2>Saved for later</h2>
+        <div class="section-line"></div>
+        <div class="section-count" id="deferredCount"></div>
+      </div>
+
+      <!-- Active checklist items — injected by renderDeferredList() in app.js -->
+      <div class="deferred-list" id="deferredList"></div>
+
+      <!-- Empty state — shown when no active deferred tabs -->
+      <div class="deferred-empty" id="deferredEmpty" style="display:none">
+        Nothing saved. Living in the moment.
+      </div>
+
+      <!-- Archive section — collapsed by default -->
+      <div class="deferred-archive" id="deferredArchive" style="display:none">
+        <button class="archive-toggle" id="archiveToggle" type="button">
+          <svg class="archive-chevron" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" /></svg>
+          Archive
+          <span class="archive-count" id="archiveCount"></span>
+        </button>
+        <div class="archive-body" id="archiveBody" style="display:none">
+          <input type="text" class="archive-search" id="archiveSearch" placeholder="Search archived tabs...">
+          <div class="archive-list" id="archiveList"></div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end .dashboard-columns -->
+
+</div><!-- end .container -->
+
+<!-- Personalization drawer — background and opt-in weather settings -->
+<div class="personalize-backdrop" id="personalizeBackdrop" hidden>
+  <section class="personalize-panel" role="dialog" aria-modal="true" aria-labelledby="personalizeTitle">
+    <div class="personalize-heading">
+      <div>
+        <span class="personalize-kicker">Make it yours</span>
+        <h2 id="personalizeTitle">Personalize your desk</h2>
+      </div>
+      <button class="panel-close" type="button" data-action="close-personalize" aria-label="Close personalization">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" /></svg>
+      </button>
+    </div>
+
+    <form id="personalizeForm">
+      <div class="setting-block">
+        <label class="setting-label" for="settingLanguage" id="lblSettingLanguage">Language / 界面语言</label>
+        <select class="setting-input setting-select" id="settingLanguage" name="settingLanguage">
+          <option value="auto">Auto / 自动跟随浏览器</option>
+          <option value="zh-CN">简体中文 (Chinese)</option>
+          <option value="en">English (US)</option>
+        </select>
+      </div>
+
+      <div class="setting-block">
+        <label class="setting-label" for="weatherCity" id="lblWeatherCity">Weather city</label>
+        <input class="setting-input" id="weatherCity" name="weatherCity" type="text" maxlength="80" placeholder="e.g. Hong Kong" autocomplete="off">
+        <p class="setting-hint" id="hintWeatherCity">Optional. Your city is sent to Open-Meteo only to fetch weather.</p>
+      </div>
+
+      <fieldset class="setting-block">
+        <legend class="setting-label" id="lblDeskBackground">Desk background</legend>
+        <div class="background-options" id="backgroundOptions">
+          <button class="background-swatch swatch-paper" type="button" data-action="preview-background" data-background="paper"><span id="swatchPaperText">Paper</span></button>
+          <button class="background-swatch swatch-sunrise" type="button" data-action="preview-background" data-background="sunrise"><span id="swatchSunriseText">Sunrise</span></button>
+          <button class="background-swatch swatch-sky" type="button" data-action="preview-background" data-background="sky"><span id="swatchSkyText">Sky</span></button>
+          <button class="background-swatch swatch-garden" type="button" data-action="preview-background" data-background="garden"><span id="swatchGardenText">Garden</span></button>
+        </div>
+      </fieldset>
+
+      <div class="setting-block">
+        <span class="setting-label" id="lblCustomPicture">Your own picture</span>
+        <div class="upload-row">
+          <input class="background-upload-input" id="backgroundUpload" type="file" accept="image/png,image/jpeg,image/webp">
+          <button class="remove-image-btn" type="button" data-action="remove-background-image" id="btnRemoveImage">Remove image</button>
+        </div>
+        <p class="setting-hint" id="backgroundStatus">Images are resized and stored only in this browser.</p>
+      </div>
+
+      <fieldset class="setting-block">
+        <legend class="setting-label" id="lblSoundMotion">Sound & Motion</legend>
+        <div class="setting-toggle-list">
+          <label class="setting-toggle-item">
+            <input type="checkbox" id="settingSound" name="settingSound" checked>
+            <span class="toggle-copy">
+              <strong id="lblSoundTitle">Swoosh sound effect</strong>
+              <small id="lblSoundDesc">Play audio feedback when closing tabs</small>
+            </span>
+          </label>
+          <label class="setting-toggle-item">
+            <input type="checkbox" id="settingConfetti" name="settingConfetti" checked>
+            <span class="toggle-copy">
+              <strong id="lblConfettiTitle">Confetti burst</strong>
+              <small id="lblConfettiDesc">Show celebration particles on tab cleanup</small>
+            </span>
+          </label>
+        </div>
+      </fieldset>
+
+      <div class="setting-block">
+        <span class="setting-label" id="lblTabOptimization">Tab optimization</span>
+        <button class="panel-action-wide-btn" type="button" data-action="discard-inactive-tabs" id="btnDiscardTabs">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" width="16" height="16"><path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.72 9.72 0 0 1 18 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 0 0 3 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 0 0 9.002-5.998Z" /></svg>
+          <span id="btnDiscardTabsText">Free up memory (Freeze inactive tabs)</span>
+        </button>
+        <p class="setting-hint" id="hintDiscardTabs">Suspends background tabs without closing them to save RAM.</p>
+      </div>
+
+      <div class="setting-block">
+        <span class="setting-label" id="lblDataBackup">Data & Backup</span>
+        <div class="backup-actions-row">
+          <button class="panel-btn secondary backup-btn" type="button" data-action="export-backup" id="btnExportData">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" width="14" height="14"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg>
+            <span id="btnExportDataText">Export JSON</span>
+          </button>
+          <label class="panel-btn secondary backup-btn" id="lblImportData">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" width="14" height="14"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5" /></svg>
+            <span id="btnImportDataText">Import JSON</span>
+            <input type="file" id="importBackupInput" accept=".json,application/json" hidden>
+          </label>
+        </div>
+        <p class="setting-hint" id="hintBackupData">Back up your workspaces and saved links to transfer across browsers.</p>
+      </div>
+
+      <div class="panel-actions">
+        <button class="panel-btn secondary" type="button" data-action="close-personalize" id="btnCancelPersonalize">Cancel</button>
+        <button class="panel-btn primary" type="submit" id="btnSavePersonalize">Save changes</button>
+      </div>
+    </form>
+  </section>
+</div>
+
+<!-- Command palette — ⌘K / Ctrl+K -->
+<div class="command-backdrop" id="commandBackdrop" hidden>
+  <section class="command-panel" role="dialog" aria-modal="true" aria-labelledby="commandTitle">
+    <h2 class="visually-hidden" id="commandTitle">Search Tab Out</h2>
+    <div class="command-input-row">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m21 21-4.35-4.35m2.1-5.4a7.5 7.5 0 1 1-15 0 7.5 7.5 0 0 1 15 0Z" /></svg>
+      <input id="commandInput" type="search" role="combobox" autocomplete="off" placeholder="Search tabs, saved links, workspaces…" aria-label="Search open tabs, saved links, and workspaces" aria-controls="commandResults" aria-haspopup="listbox" aria-autocomplete="list" aria-expanded="false">
+      <kbd>esc</kbd>
+    </div>
+    <!-- [html-validate-disable-next prefer-native-element] -->
+    <div class="command-results" id="commandResults" role="listbox"></div>
+    <div class="command-hints" aria-hidden="true">
+      <span><kbd>↑</kbd><kbd>↓</kbd> move</span>
+      <span><kbd>↵</kbd> open</span>
+      <span>Type to search everything</span>
+    </div>
+  </section>
+</div>
+
+<!-- ================================================================
+     TOAST — floats above everything, used for action confirmations
+     Hidden by default via CSS (opacity:0, translateY)
+     ================================================================ -->
+<div class="toast" id="toast">
+  <!-- Checkmark circle icon (Heroicons outline) -->
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+  </svg>
+  <span id="toastText"></span>
+</div>
+
+<!-- Personal config (gitignored) — defines LOCAL_LANDING_PAGE_PATTERNS etc. -->
+<!-- If the file doesn't exist, that's fine — app.js uses sensible defaults. -->
+<script src="config.local.js" onerror="/* no personal config, that's fine */"></script>
+
+<!-- Main dashboard logic — loads last so the DOM is ready -->
+<script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,9 @@
+node_modules/
+*.log
+*.db
+.DS_Store
+docs/superpowers/
+.superdesign/
+
+# Personal config (landing page patterns, etc.) — never push to GitHub
+extension/config.local.js
