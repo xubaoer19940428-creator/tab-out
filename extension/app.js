@@ -801,9 +801,20 @@ const MASCOT_QUOTES = {
   ]
 };
 
+const CAT_COAT_COLORS = ['orange', 'white', 'black', 'silver', 'siamese', 'pink'];
+const CAT_COAT_NAMES = {
+  orange: '🍊 活力暖橘',
+  white: '🥛 纯洁雪白',
+  black: '🖤 黑曜石黑',
+  silver: '🐾 美短银虎斑',
+  siamese: '☕ 焦糖暹罗',
+  pink: '🌸 樱花赛博'
+};
+
 function updateMascotState() {
   const island = document.getElementById('mascotIsland');
   const charEl = document.getElementById('mascotCharacter');
+  const liveCat = document.getElementById('liveCat');
   const bubbleText = document.getElementById('mascotBubbleText');
   const quickAction = document.getElementById('mascotQuickAction');
   if (!island || !charEl) return;
@@ -813,6 +824,10 @@ function updateMascotState() {
     return;
   }
   island.classList.remove('is-hidden');
+
+  if (liveCat) {
+    liveCat.dataset.catColor = preferences?.catColor || 'orange';
+  }
 
   const tabCount = openTabs.filter(t => !t.isTabOut).length;
   const isPlayingAudio = openTabs.some(t => t.audible);
@@ -853,6 +868,21 @@ function updateMascotState() {
   }
 }
 
+async function cycleCatColor() {
+  const current = preferences?.catColor || 'orange';
+  const nextIdx = (CAT_COAT_COLORS.indexOf(current) + 1) % CAT_COAT_COLORS.length;
+  const nextColor = CAT_COAT_COLORS[nextIdx];
+
+  preferences.catColor = nextColor;
+  try {
+    await chrome.storage.local.set({ [PREFERENCES_KEY]: preferences });
+  } catch {}
+
+  updateMascotState();
+  playAudioEffect('bubble');
+  showToast(`✨ 猫咪换上了【${CAT_COAT_NAMES[nextColor]}】毛色！`);
+}
+
 function petMascot(e) {
   const charEl = document.getElementById('mascotCharacter');
   if (!charEl) return;
@@ -864,6 +894,11 @@ function petMascot(e) {
   mascotPetCount++;
   if (mascotPetTimer) clearTimeout(mascotPetTimer);
   mascotPetTimer = setTimeout(() => { mascotPetCount = 0; }, 2000);
+
+  // If rapid 5 clicks, trigger coat cycle!
+  if (mascotPetCount === 5) {
+    cycleCatColor();
+  }
 
   // Spawn floating heart particles
   const rect = charEl.getBoundingClientRect();
@@ -1363,6 +1398,7 @@ const DEFAULT_PREFERENCES = {
   confettiEnabled: true,
   mascotEnabled: true,
   mascotType: 'cat',
+  catColor: 'orange',
 };
 
 let preferences = { ...DEFAULT_PREFERENCES };
@@ -1441,8 +1477,8 @@ function openPersonalization() {
   const mascotCheckbox = document.getElementById('settingMascot');
   if (mascotCheckbox) mascotCheckbox.checked = pendingPreferences.mascotEnabled !== false;
 
-  const mascotTypeSelect = document.getElementById('settingMascotType');
-  if (mascotTypeSelect) mascotTypeSelect.value = pendingPreferences.mascotType || 'cat';
+  const catColorSelect = document.getElementById('settingCatColor');
+  if (catColorSelect) catColorSelect.value = pendingPreferences.catColor || 'orange';
 
   syncBackgroundButtons(pendingPreferences.background);
   updateBackgroundStatus();
@@ -3221,7 +3257,7 @@ document.getElementById('personalizeForm')?.addEventListener('submit', async (e)
   const soundPackSelect = document.getElementById('settingSoundPack');
   const confettiCheckbox = document.getElementById('settingConfetti');
   const mascotCheckbox = document.getElementById('settingMascot');
-  const mascotTypeSelect = document.getElementById('settingMascotType');
+  const catColorSelect = document.getElementById('settingCatColor');
 
   pendingPreferences.city = cityInput ? cityInput.value.trim() : '';
   pendingPreferences.language = langSelect ? langSelect.value : 'auto';
@@ -3229,7 +3265,7 @@ document.getElementById('personalizeForm')?.addEventListener('submit', async (e)
   pendingPreferences.soundPack = soundPackSelect ? soundPackSelect.value : 'swoosh';
   pendingPreferences.confettiEnabled = confettiCheckbox ? confettiCheckbox.checked : true;
   pendingPreferences.mascotEnabled = mascotCheckbox ? mascotCheckbox.checked : true;
-  pendingPreferences.mascotType = mascotTypeSelect ? mascotTypeSelect.value : 'cat';
+  pendingPreferences.catColor = catColorSelect ? catColorSelect.value : 'orange';
 
   const nextPreferences = { ...DEFAULT_PREFERENCES, ...pendingPreferences };
 

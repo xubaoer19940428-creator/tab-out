@@ -3387,6 +3387,150 @@ body.command-open { overflow: hidden; }
   animation: sweatDrop 1s infinite alternate;
 }
 
+/* ---- Cat Coat Color Variations ---- */
+
+/* 1. Snow White Cat (纯白雪猫，蓝眼粉耳) */
+.live-cat[data-cat-color="white"] .cat-ear {
+  background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+}
+.live-cat[data-cat-color="white"] .cat-head {
+  background: radial-gradient(circle at 50% 35%, #ffffff 0%, #f8fafc 70%, #e2e8f0 100%);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+.live-cat[data-cat-color="white"] .cat-stripes {
+  display: none;
+}
+.live-cat[data-cat-color="white"] .cat-pupil {
+  background: radial-gradient(circle at 50% 50%, #38bdf8 30%, #0284c7 90%);
+}
+.live-cat[data-cat-color="white"] .cat-body {
+  background: linear-gradient(180deg, #ffffff 0%, #f1f5f9 100%);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+}
+.live-cat[data-cat-color="white"] .cat-chest {
+  background: #ffffff;
+}
+.live-cat[data-cat-color="white"] .cat-tail-path {
+  background: linear-gradient(180deg, #e2e8f0 0%, #ffffff 70%, #f1f5f9 100%);
+}
+.live-cat[data-cat-color="white"] .cat-eyelid {
+  background: #f8fafc;
+}
+
+/* 2. Midnight Black Cat (黑曜石黑猫，翡翠宝石眼) */
+.live-cat[data-cat-color="black"] .cat-ear {
+  background: linear-gradient(135deg, #334155 0%, #0f172a 100%);
+}
+.live-cat[data-cat-color="black"] .cat-head {
+  background: radial-gradient(circle at 50% 35%, #475569 0%, #1e293b 65%, #0f172a 100%);
+}
+.live-cat[data-cat-color="black"] .cat-stripes {
+  background: #020617;
+}
+.live-cat[data-cat-color="black"] .cat-pupil {
+  background: radial-gradient(circle at 50% 50%, #4ade80 20%, #15803d 85%);
+}
+.live-cat[data-cat-color="black"] .cat-body {
+  background: linear-gradient(180deg, #334155 0%, #0f172a 100%);
+}
+.live-cat[data-cat-color="black"] .cat-chest {
+  background: #1e293b;
+}
+.live-cat[data-cat-color="black"] .cat-tail-path {
+  background: linear-gradient(180deg, #0f172a 0%, #1e293b 70%, #334155 100%);
+}
+.live-cat[data-cat-color="black"] .cat-eyelid {
+  background: #1e293b;
+}
+.live-cat[data-cat-color="black"] .cat-mouth {
+  border-bottom-color: #64748b;
+}
+
+/* 3. Silver Tabby (美短银虎斑) */
+.live-cat[data-cat-color="silver"] .cat-ear {
+  background: linear-gradient(135deg, #94a3b8 0%, #64748b 100%);
+}
+.live-cat[data-cat-color="silver"] .cat-head {
+  background: radial-gradient(circle at 50% 35%, #cbd5e1 0%, #94a3b8 65%, #64748b 100%);
+}
+.live-cat[data-cat-color="silver"] .cat-stripes {
+  background: #334155;
+  width: 8px;
+}
+.live-cat[data-cat-color="silver"] .cat-pupil {
+  background: radial-gradient(circle at 50% 50%, #facc15 20%, #a16207 85%);
+}
+.live-cat[data-cat-color="silver"] .cat-body {
+  background: linear-gradient(180deg, #94a3b8 0%, #64748b 100%);
+}
+.live-cat[data-cat-color="silver"] .cat-chest {
+  background: #f1f5f9;
+}
+.live-cat[data-cat-color="silver"] .cat-tail-path {
+  background: linear-gradient(180deg, #475569 0%, #94a3b8 70%, #cbd5e1 100%);
+}
+.live-cat[data-cat-color="silver"] .cat-eyelid {
+  background: #94a3b8;
+}
+
+/* 4. Caramel Siamese (焦糖暹罗糊脸猫) */
+.live-cat[data-cat-color="siamese"] .cat-ear {
+  background: linear-gradient(135deg, #451a03 0%, #291102 100%);
+}
+.live-cat[data-cat-color="siamese"] .cat-head {
+  background: radial-gradient(circle at 50% 35%, #fef3c7 0%, #fde68a 50%, #78350f 90%);
+}
+.live-cat[data-cat-color="siamese"] .cat-stripes {
+  display: none;
+}
+.live-cat[data-cat-color="siamese"] .cat-muzzle {
+  background: #78350f;
+  padding: 2px 4px;
+  border-radius: 8px;
+}
+.live-cat[data-cat-color="siamese"] .cat-pupil {
+  background: radial-gradient(circle at 50% 50%, #60a5fa 30%, #1d4ed8 90%);
+}
+.live-cat[data-cat-color="siamese"] .cat-body {
+  background: linear-gradient(180deg, #fef3c7 0%, #fde68a 100%);
+}
+.live-cat[data-cat-color="siamese"] .cat-chest {
+  background: #fffbeb;
+}
+.live-cat[data-cat-color="siamese"] .cat-tail-path {
+  background: linear-gradient(180deg, #291102 0%, #78350f 70%, #451a03 100%);
+}
+.live-cat[data-cat-color="siamese"] .cat-eyelid {
+  background: #d97706;
+}
+
+/* 5. Sakura Cyber Pink (樱花赛博霓虹猫) */
+.live-cat[data-cat-color="pink"] .cat-ear {
+  background: linear-gradient(135deg, #f472b6 0%, #db2777 100%);
+}
+.live-cat[data-cat-color="pink"] .cat-head {
+  background: radial-gradient(circle at 50% 35%, #fce7f3 0%, #f472b6 65%, #db2777 100%);
+}
+.live-cat[data-cat-color="pink"] .cat-stripes {
+  background: #9d174d;
+}
+.live-cat[data-cat-color="pink"] .cat-pupil {
+  background: radial-gradient(circle at 50% 50%, #c084fc 25%, #7e22ce 90%);
+}
+.live-cat[data-cat-color="pink"] .cat-body {
+  background: linear-gradient(180deg, #f472b6 0%, #db2777 100%);
+}
+.live-cat[data-cat-color="pink"] .cat-chest {
+  background: #fff1f2;
+}
+.live-cat[data-cat-color="pink"] .cat-tail-path {
+  background: linear-gradient(180deg, #db2777 0%, #f472b6 70%, #fce7f3 100%);
+}
+.live-cat[data-cat-color="pink"] .cat-eyelid {
+  background: #f472b6;
+}
+
 .is-overloaded .cat-sweat {
   display: block;
 }
