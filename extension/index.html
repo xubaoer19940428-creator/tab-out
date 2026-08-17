@@ -25,8 +25,12 @@
     <div class="header-tools">
       <button class="command-btn" type="button" data-action="open-command" aria-label="Search tabs, saved items, and workspaces">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m21 21-4.35-4.35m2.1-5.4a7.5 7.5 0 1 1-15 0 7.5 7.5 0 0 1 15 0Z" /></svg>
-        <span>Find anything</span>
+        <span id="headerSearchText">Find anything</span>
         <kbd>⌘K</kbd>
+      </button>
+      <button class="quick-action-btn" type="button" data-action="discard-inactive-tabs" title="Free up memory (Freeze inactive tabs)" aria-label="Free up memory">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.72 9.72 0 0 1 18 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 0 0 3 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 0 0 9.002-5.998Z" /></svg>
+        <span id="quickDiscardText">Free RAM</span>
       </button>
       <button class="weather-card" id="weatherCard" type="button" data-action="open-personalize" aria-label="Set up weather">
         <span class="weather-icon" id="weatherIcon" aria-hidden="true">☀️</span>
@@ -37,7 +41,7 @@
       </button>
       <div class="clock-card" role="timer" aria-label="Local time">
         <strong id="clockTime">--:--</strong>
-        <span>Local time</span>
+        <span id="clockLabel">Local time</span>
       </div>
       <button class="personalize-btn" type="button" data-action="open-personalize" aria-label="Personalize Tab Out" title="Personalize">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" aria-hidden="true">
@@ -172,6 +176,8 @@
         <legend class="setting-label" id="lblDeskBackground">Desk background</legend>
         <div class="background-options" id="backgroundOptions">
           <button class="background-swatch swatch-paper" type="button" data-action="preview-background" data-background="paper"><span id="swatchPaperText">Paper</span></button>
+          <button class="background-swatch swatch-dark" type="button" data-action="preview-background" data-background="dark"><span id="swatchDarkText">Dark 极夜</span></button>
+          <button class="background-swatch swatch-space" type="button" data-action="preview-background" data-background="space"><span id="swatchSpaceText">Space 深空</span></button>
           <button class="background-swatch swatch-sunrise" type="button" data-action="preview-background" data-background="sunrise"><span id="swatchSunriseText">Sunrise</span></button>
           <button class="background-swatch swatch-sky" type="button" data-action="preview-background" data-background="sky"><span id="swatchSkyText">Sky</span></button>
           <button class="background-swatch swatch-garden" type="button" data-action="preview-background" data-background="garden"><span id="swatchGardenText">Garden</span></button>

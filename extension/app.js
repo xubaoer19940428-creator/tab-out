@@ -884,8 +884,18 @@ function updateStaticI18n() {
   const lblDeskBackground = document.getElementById('lblDeskBackground');
   if (lblDeskBackground) lblDeskBackground.textContent = isZh ? '桌面背景' : 'Desk background';
 
+  const headerSearchText = document.getElementById('headerSearchText');
+  if (headerSearchText) headerSearchText.textContent = t('findAnything');
+
+  const quickDiscardText = document.getElementById('quickDiscardText');
+  if (quickDiscardText) quickDiscardText.textContent = isZh ? '释放内存' : 'Free RAM';
+
   const swatchPaperText = document.getElementById('swatchPaperText');
   if (swatchPaperText) swatchPaperText.textContent = isZh ? '复古纸' : 'Paper';
+  const swatchDarkText = document.getElementById('swatchDarkText');
+  if (swatchDarkText) swatchDarkText.textContent = isZh ? '极夜深黑' : 'Dark';
+  const swatchSpaceText = document.getElementById('swatchSpaceText');
+  if (swatchSpaceText) swatchSpaceText.textContent = isZh ? '深空冷灰' : 'Space';
   const swatchSunriseText = document.getElementById('swatchSunriseText');
   if (swatchSunriseText) swatchSunriseText.textContent = isZh ? '日出' : 'Sunrise';
   const swatchSkyText = document.getElementById('swatchSkyText');
