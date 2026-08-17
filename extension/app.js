@@ -656,57 +656,375 @@ function closeWorkspaceForm(restoreFocus = true) {
 
 
 /* ----------------------------------------------------------------
-   UI HELPERS
+   PLAYFUL SUITE: Web Audio Synthesizer, Mascot, Woodfish & Arcade
    ---------------------------------------------------------------- */
 
 /**
- * playCloseSound()
- *
- * Plays a clean "swoosh" sound when tabs are closed.
- * Built entirely with the Web Audio API — no sound files needed.
- * A filtered noise sweep that descends in pitch, like air moving.
+ * playAudioEffect(type)
+ * Web Audio API synthesizer — 100% code generated, zero external audio assets.
  */
-function playCloseSound() {
+function playAudioEffect(type) {
   if (preferences && preferences.soundEnabled === false) return;
+  const pack = type || (preferences?.soundPack || 'swoosh');
+
   try {
     const ctx = new (window.AudioContext || window.webkitAudioContext)();
     const t = ctx.currentTime;
 
-    // Swoosh: shaped white noise through a sweeping bandpass filter
-    const duration = 0.25;
-    const buffer = ctx.createBuffer(1, ctx.sampleRate * duration, ctx.sampleRate);
-    const data = buffer.getChannelData(0);
-
-    // Generate noise with a natural envelope (quick attack, smooth decay)
-    for (let i = 0; i < data.length; i++) {
-      const pos = i / data.length;
-      // Envelope: ramps up fast in first 10%, then fades out smoothly
-      const env = pos < 0.1 ? pos / 0.1 : Math.pow(1 - (pos - 0.1) / 0.9, 1.5);
-      data[i] = (Math.random() * 2 - 1) * env;
+    if (pack === 'bubble') {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(400, t);
+      osc.frequency.exponentialRampToValueAtTime(1400, t + 0.08);
+      gain.gain.setValueAtTime(0.3, t);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.08);
+      osc.connect(gain).connect(ctx.destination);
+      osc.start(t);
+      osc.stop(t + 0.08);
+    } else if (pack === 'mech') {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(1200, t);
+      osc.frequency.exponentialRampToValueAtTime(300, t + 0.04);
+      gain.gain.setValueAtTime(0.4, t);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.04);
+      osc.connect(gain).connect(ctx.destination);
+      osc.start(t);
+      osc.stop(t + 0.04);
+    } else if (pack === 'arcade') {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(987.77, t);
+      osc.frequency.setValueAtTime(1318.51, t + 0.08);
+      gain.gain.setValueAtTime(0.15, t);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.25);
+      osc.connect(gain).connect(ctx.destination);
+      osc.start(t);
+      osc.stop(t + 0.25);
+    } else if (pack === 'laser') {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(1600, t);
+      osc.frequency.exponentialRampToValueAtTime(120, t + 0.15);
+      gain.gain.setValueAtTime(0.25, t);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.15);
+      osc.connect(gain).connect(ctx.destination);
+      osc.start(t);
+      osc.stop(t + 0.15);
+    } else if (pack === 'woodfish') {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(540, t);
+      osc.frequency.exponentialRampToValueAtTime(180, t + 0.12);
+      gain.gain.setValueAtTime(0.5, t);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.12);
+      osc.connect(gain).connect(ctx.destination);
+      osc.start(t);
+      osc.stop(t + 0.12);
+    } else if (pack === 'purr') {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(80, t);
+      osc.frequency.linearRampToValueAtTime(120, t + 0.15);
+      osc.frequency.linearRampToValueAtTime(70, t + 0.3);
+      gain.gain.setValueAtTime(0.2, t);
+      gain.gain.linearRampToValueAtTime(0.001, t + 0.3);
+      osc.connect(gain).connect(ctx.destination);
+      osc.start(t);
+      osc.stop(t + 0.3);
+    } else {
+      const duration = 0.25;
+      const buffer = ctx.createBuffer(1, ctx.sampleRate * duration, ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < data.length; i++) {
+        const pos = i / data.length;
+        const env = pos < 0.1 ? pos / 0.1 : Math.pow(1 - (pos - 0.1) / 0.9, 1.5);
+        data[i] = (Math.random() * 2 - 1) * env;
+      }
+      const source = ctx.createBufferSource();
+      source.buffer = buffer;
+      const filter = ctx.createBiquadFilter();
+      filter.type = 'bandpass';
+      filter.Q.value = 2.0;
+      filter.frequency.setValueAtTime(4000, t);
+      filter.frequency.exponentialRampToValueAtTime(400, t + duration);
+      const gain = ctx.createGain();
+      gain.gain.setValueAtTime(0.15, t);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + duration);
+      source.connect(filter).connect(gain).connect(ctx.destination);
+      source.start(t);
     }
 
-    const source = ctx.createBufferSource();
-    source.buffer = buffer;
+    setTimeout(() => ctx.close(), 600);
+  } catch {}
+}
 
-    // Bandpass filter sweeps from high to low — creates the "swoosh" character
-    const filter = ctx.createBiquadFilter();
-    filter.type = 'bandpass';
-    filter.Q.value = 2.0;
-    filter.frequency.setValueAtTime(4000, t);
-    filter.frequency.exponentialRampToValueAtTime(400, t + duration);
+function playCloseSound() {
+  playAudioEffect();
+}
 
-    // Volume
-    const gain = ctx.createGain();
-    gain.gain.setValueAtTime(0.15, t);
-    gain.gain.exponentialRampToValueAtTime(0.001, t + duration);
+/* ================================================================
+   1. MASCOT MANAGER (桌面情绪宠物)
+   ================================================================ */
+let mascotPetCount = 0;
+let mascotPetTimer = null;
 
-    source.connect(filter).connect(gain).connect(ctx.destination);
-    source.start(t);
+const MASCOT_QUOTES = {
+  chill: [
+    '活在当下，桌面真整洁 ✨',
+    '一杯咖啡，惬意的一天 ☕',
+    '标签刚刚好，心情美滋滋~',
+    'Chill vibes only. Keep it neat.',
+  ],
+  busy: [
+    '正在全速运转中，加油打工人！💪',
+    '代码敲得飞起，冲冲冲！🚀',
+    '这么多标签，你是在摸鱼还是在干大事？👀',
+    'Focus mode on! You got this.',
+  ],
+  overloaded: [
+    '老板救命！标签大山要把我压扁啦 🚨',
+    '电脑内存要冒烟了！点我帮你释放内存 ⚡',
+    '开了这么多标签，真的看得过来吗 😭',
+    'Tab overload! Time to clean up.',
+  ],
+  dj: [
+    '这首歌太带感了，跟着节奏摇摆 🎧🎵',
+    '音乐不息，编码不止 ♫',
+    'DJ in the house! Drop the beat 🎶',
+  ]
+};
 
-    setTimeout(() => ctx.close(), 500);
-  } catch {
-    // Audio not supported — fail silently
+function updateMascotState() {
+  const island = document.getElementById('mascotIsland');
+  const charEl = document.getElementById('mascotCharacter');
+  const bubbleText = document.getElementById('mascotBubbleText');
+  const quickAction = document.getElementById('mascotQuickAction');
+  if (!island || !charEl) return;
+
+  if (preferences && preferences.mascotEnabled === false) {
+    island.classList.add('is-hidden');
+    return;
   }
+  island.classList.remove('is-hidden');
+
+  const avatarType = preferences?.mascotType || 'cat';
+  const avatarIcons = {
+    cat: { default: '🐱', chill: '☕🐱', busy: '💻🐱', overloaded: '📚🐱', dj: '🎧🐱' },
+    bot: { default: '🤖', chill: '🔋🤖', busy: '⚡🤖', overloaded: '🔥🤖', dj: '🎵🤖' },
+    dog: { default: '🐶', chill: '🦴🐶', busy: '🎾🐶', overloaded: '📦🐶', dj: '🎧🐶' },
+  };
+  const icons = avatarIcons[avatarType] || avatarIcons.cat;
+
+  const tabCount = openTabs.filter(t => !t.isTabOut).length;
+  const isPlayingAudio = openTabs.some(t => t.audible);
+
+  charEl.classList.remove('is-typing', 'is-overloaded', 'is-dj');
+
+  let state = 'chill';
+  if (isPlayingAudio) {
+    state = 'dj';
+    charEl.classList.add('is-dj');
+    charEl.textContent = icons.dj;
+  } else if (tabCount > 18) {
+    state = 'overloaded';
+    charEl.classList.add('is-overloaded');
+    charEl.textContent = icons.overloaded;
+  } else if (tabCount >= 7) {
+    state = 'busy';
+    charEl.classList.add('is-typing');
+    charEl.textContent = icons.busy;
+  } else {
+    state = 'chill';
+    charEl.textContent = icons.chill;
+  }
+
+  if (bubbleText) {
+    const list = MASCOT_QUOTES[state] || MASCOT_QUOTES.chill;
+    bubbleText.textContent = list[Math.floor(Math.random() * list.length)];
+  }
+
+  if (quickAction) {
+    if (state === 'overloaded') {
+      quickAction.textContent = '⚡ 释放内存';
+      quickAction.style.display = 'inline-flex';
+      quickAction.onclick = async (e) => {
+        e.stopPropagation();
+        await discardInactiveTabs();
+      };
+    } else {
+      quickAction.style.display = 'none';
+      quickAction.onclick = null;
+    }
+  }
+}
+
+function petMascot(e) {
+  const charEl = document.getElementById('mascotCharacter');
+  if (!charEl) return;
+
+  playAudioEffect('purr');
+  charEl.classList.add('is-jumping');
+  setTimeout(() => charEl.classList.remove('is-jumping'), 600);
+
+  mascotPetCount++;
+  if (mascotPetTimer) clearTimeout(mascotPetTimer);
+  mascotPetTimer = setTimeout(() => { mascotPetCount = 0; }, 2000);
+
+  // Spawn floating heart particles
+  const rect = charEl.getBoundingClientRect();
+  const particle = document.createElement('div');
+  particle.className = 'mascot-particle';
+  particle.textContent = mascotPetCount >= 3 ? '💖' : '✨';
+  particle.style.left = `${rect.left + 15 + (Math.random() * 20 - 10)}px`;
+  particle.style.top = `${rect.top - 10}px`;
+  document.body.appendChild(particle);
+  setTimeout(() => particle.remove(), 900);
+
+  // Random humorous speech on click
+  const bubbleText = document.getElementById('mascotBubbleText');
+  if (bubbleText) {
+    const funQuotes = [
+      '喵呜~ 摸摸很舒服！🐱',
+      '摸头+1，Bug-1，今天注定写出优雅代码！✨',
+      '你已经摸了我 ' + mascotPetCount + ' 次啦，快去完成任务吧！',
+      'Purr~ Keep up the great work!',
+      '赛博小猫正在为您祈福：编译一次过！🙏',
+    ];
+    bubbleText.textContent = funQuotes[Math.floor(Math.random() * funQuotes.length)];
+  }
+}
+
+/* ================================================================
+   2. CYBER WOODFISH & DAILY ORACLE (赛博木鱼与每日极客神签)
+   ================================================================ */
+let woodfishKnocks = 0;
+
+const GEEK_FORTUNES = [
+  '今日宜：重构陈旧模块；忌：在没有备份的情况下直接改生产环境。',
+  '今日宜：给变量起一个极具诗意的名字；忌：在单测中直接写 expect(true).toBe(true)。',
+  '今日宜：整理 3 天前的标签；忌：下班前 5 分钟提交大规模 PR。',
+  '今日宜：喝一杯热咖啡后优雅 Debug；忌：向产品经理妥协第 10 个修改要求。',
+  '今日宜：开启 Tab Out 街机粉碎模式；忌：开着 50 个标签假装自己在学习。',
+  '今日宜：准时下班享受生活；忌：周末偷偷看工作邮件。'
+];
+
+const MERIT_LABELS = ['功德 +1', '内存 +256MB', 'Bug -1', '头发 +1', '薪资 +10%', '单测通过 +1'];
+
+function openCyberWoodfish() {
+  const modal = document.getElementById('woodfishBackdrop');
+  if (modal) modal.hidden = false;
+  updateFortuneText();
+}
+
+function closeCyberWoodfish() {
+  const modal = document.getElementById('woodfishBackdrop');
+  if (modal) modal.hidden = true;
+}
+
+function knockWoodfish(e) {
+  playAudioEffect('woodfish');
+  woodfishKnocks++;
+
+  const countEl = document.getElementById('woodfishCount');
+  if (countEl) countEl.textContent = woodfishKnocks;
+
+  const icon = document.getElementById('woodfishIcon');
+  if (icon) {
+    icon.classList.add('is-knocking');
+    setTimeout(() => icon.classList.remove('is-knocking'), 100);
+  }
+
+  // Floating merit text
+  const stage = document.getElementById('woodfishStage');
+  if (stage) {
+    const rect = stage.getBoundingClientRect();
+    const merit = document.createElement('div');
+    merit.className = 'merit-particle';
+    merit.textContent = MERIT_LABELS[Math.floor(Math.random() * MERIT_LABELS.length)];
+    merit.style.left = `${rect.left + rect.width / 2 - 30 + (Math.random() * 40 - 20)}px`;
+    merit.style.top = `${rect.top + 30}px`;
+    document.body.appendChild(merit);
+    setTimeout(() => merit.remove(), 900);
+  }
+
+  if (woodfishKnocks % 3 === 0) {
+    updateFortuneText();
+  }
+}
+
+function updateFortuneText() {
+  const el = document.getElementById('fortuneText');
+  if (el) {
+    el.textContent = GEEK_FORTUNES[Math.floor(Math.random() * GEEK_FORTUNES.length)];
+  }
+}
+
+/* ================================================================
+   3. ARCADE BLAST MODE (街机激光粉碎模式)
+   ================================================================ */
+let isArcadeMode = false;
+
+function toggleArcadeMode() {
+  isArcadeMode = !isArcadeMode;
+  document.body.classList.toggle('is-arcade-mode', isArcadeMode);
+  const hud = document.getElementById('arcadeHud');
+  if (hud) hud.style.display = isArcadeMode ? 'block' : 'none';
+
+  if (isArcadeMode) {
+    playAudioEffect('arcade');
+    showToast('🕹️ 街机粉碎模式已启动！点击标签发射激光击碎');
+  } else {
+    showToast('已退出街机粉碎模式');
+  }
+}
+
+function fireArcadeLaser(targetEl) {
+  if (!isArcadeMode || !targetEl) return;
+
+  playAudioEffect('laser');
+
+  const rect = targetEl.getBoundingClientRect();
+  const targetX = rect.left + rect.width / 2;
+  const targetY = rect.top + rect.height / 2;
+
+  // Laser beam from bottom center to target
+  const startX = window.innerWidth / 2;
+  const startY = window.innerHeight;
+  const dx = targetX - startX;
+  const dy = targetY - startY;
+  const length = Math.sqrt(dx * dx + dy * dy);
+  const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+
+  const beam = document.createElement('div');
+  beam.className = 'laser-beam';
+  beam.style.left = `${startX}px`;
+  beam.style.top = `${startY}px`;
+  beam.style.width = `${length}px`;
+  beam.style.height = '4px';
+  beam.style.transform = `rotate(${angle}deg)`;
+  beam.style.transformOrigin = '0 50%';
+  document.body.appendChild(beam);
+
+  setTimeout(() => {
+    beam.style.opacity = '0';
+    setTimeout(() => beam.remove(), 150);
+  }, 100);
+
+  // 8-bit Explosion particle
+  const explosion = document.createElement('div');
+  explosion.className = 'arcade-explosion';
+  explosion.textContent = '💥';
+  explosion.style.left = `${targetX}px`;
+  explosion.style.top = `${targetY}px`;
+  document.body.appendChild(explosion);
+  setTimeout(() => explosion.remove(), 400);
 }
 
 /**
@@ -797,11 +1115,12 @@ function animateCardOut(card) {
   const rect = card.getBoundingClientRect();
   shootConfetti(rect.left + rect.width / 2, rect.top + rect.height / 2);
 
-  card.classList.add('closing');
+  card.classList.add('black-hole-collapsing');
   setTimeout(() => {
     card.remove();
     checkAndShowEmptyState();
-  }, 300);
+    updateMascotState();
+  }, 420);
 }
 
 function showToast(message, options = {}) {
@@ -1052,7 +1371,10 @@ const DEFAULT_PREFERENCES = {
   backgroundImage: '',
   language: 'auto',
   soundEnabled: true,
+  soundPack: 'swoosh',
   confettiEnabled: true,
+  mascotEnabled: true,
+  mascotType: 'cat',
 };
 
 let preferences = { ...DEFAULT_PREFERENCES };
@@ -1103,6 +1425,7 @@ async function loadPreferences() {
 
   applyBackground(preferences);
   updateStaticI18n();
+  updateMascotState();
   await refreshWeather();
 }
 
@@ -1121,8 +1444,17 @@ function openPersonalization() {
   const soundCheckbox = document.getElementById('settingSound');
   if (soundCheckbox) soundCheckbox.checked = pendingPreferences.soundEnabled !== false;
 
+  const soundPackSelect = document.getElementById('settingSoundPack');
+  if (soundPackSelect) soundPackSelect.value = pendingPreferences.soundPack || 'swoosh';
+
   const confettiCheckbox = document.getElementById('settingConfetti');
   if (confettiCheckbox) confettiCheckbox.checked = pendingPreferences.confettiEnabled !== false;
+
+  const mascotCheckbox = document.getElementById('settingMascot');
+  if (mascotCheckbox) mascotCheckbox.checked = pendingPreferences.mascotEnabled !== false;
+
+  const mascotTypeSelect = document.getElementById('settingMascotType');
+  if (mascotTypeSelect) mascotTypeSelect.value = pendingPreferences.mascotType || 'cat';
 
   syncBackgroundButtons(pendingPreferences.background);
   updateBackgroundStatus();
@@ -2279,6 +2611,7 @@ async function renderStaticDashboard() {
 
 async function renderDashboard() {
   await renderStaticDashboard();
+  updateMascotState();
 }
 
 
@@ -2388,6 +2721,28 @@ document.addEventListener('click', async (e) => {
     return;
   }
 
+  // ---- Cyber Woodfish Modal ----
+  if (action === 'open-woodfish') {
+    openCyberWoodfish();
+    return;
+  }
+
+  if (action === 'close-woodfish') {
+    closeCyberWoodfish();
+    return;
+  }
+
+  // ---- Arcade Mode Toggle ----
+  if (action === 'toggle-arcade') {
+    toggleArcadeMode();
+    return;
+  }
+
+  if (action === 'exit-arcade') {
+    if (isArcadeMode) toggleArcadeMode();
+    return;
+  }
+
   const card = actionEl.closest('.mission-card');
 
   // ---- Expand overflow chips ("+N more") ----
@@ -2400,8 +2755,35 @@ document.addEventListener('click', async (e) => {
     return;
   }
 
-  // ---- Focus a specific tab ----
+  // ---- Focus a specific tab (or Blast in Arcade Mode) ----
   if (action === 'focus-tab') {
+    if (isArcadeMode) {
+      fireArcadeLaser(actionEl);
+      const tabUrl = actionEl.dataset.tabUrl;
+      if (tabUrl) {
+        const allTabs = await chrome.tabs.query({});
+        const match = allTabs.find(t => t.url === tabUrl);
+        if (match) {
+          recordClosedTabs([match]);
+          await chrome.tabs.remove(match.id);
+        }
+        await fetchOpenTabs();
+        actionEl.style.transition = 'transform 0.2s, opacity 0.2s';
+        actionEl.style.transform = 'scale(0) rotate(20deg)';
+        actionEl.style.opacity = '0';
+        setTimeout(() => {
+          actionEl.remove();
+          document.querySelectorAll('.mission-card').forEach(c => {
+            if (c.querySelectorAll('.page-chip[data-action="focus-tab"]').length === 0) {
+              animateCardOut(c);
+            }
+          });
+        }, 200);
+        showToast('🎯 标签已被击碎！', { actionText: t('undoShortcut'), onAction: undoLastClosed });
+      }
+      return;
+    }
+
     const tabUrl = actionEl.dataset.tabUrl;
     if (tabUrl) await focusTab(tabUrl);
     return;
@@ -2848,12 +3230,18 @@ document.getElementById('personalizeForm')?.addEventListener('submit', async (e)
   const cityInput = document.getElementById('weatherCity');
   const langSelect = document.getElementById('settingLanguage');
   const soundCheckbox = document.getElementById('settingSound');
+  const soundPackSelect = document.getElementById('settingSoundPack');
   const confettiCheckbox = document.getElementById('settingConfetti');
+  const mascotCheckbox = document.getElementById('settingMascot');
+  const mascotTypeSelect = document.getElementById('settingMascotType');
 
   pendingPreferences.city = cityInput ? cityInput.value.trim() : '';
   pendingPreferences.language = langSelect ? langSelect.value : 'auto';
   pendingPreferences.soundEnabled = soundCheckbox ? soundCheckbox.checked : true;
+  pendingPreferences.soundPack = soundPackSelect ? soundPackSelect.value : 'swoosh';
   pendingPreferences.confettiEnabled = confettiCheckbox ? confettiCheckbox.checked : true;
+  pendingPreferences.mascotEnabled = mascotCheckbox ? mascotCheckbox.checked : true;
+  pendingPreferences.mascotType = mascotTypeSelect ? mascotTypeSelect.value : 'cat';
 
   const nextPreferences = { ...DEFAULT_PREFERENCES, ...pendingPreferences };
 
@@ -2862,6 +3250,7 @@ document.getElementById('personalizeForm')?.addEventListener('submit', async (e)
     preferences = nextPreferences;
     applyBackground(preferences);
     updateStaticI18n();
+    updateMascotState();
     closePersonalization(false);
     showToast(t('deskUpdated'));
     await refreshWeather();
@@ -2923,9 +3312,21 @@ document.getElementById('commandBackdrop')?.addEventListener('click', (e) => {
   if (e.target.id === 'commandBackdrop') closeCommandPalette();
 });
 
+document.getElementById('mascotStage')?.addEventListener('click', petMascot);
+document.getElementById('woodfishStage')?.addEventListener('click', knockWoodfish);
+document.getElementById('woodfishBackdrop')?.addEventListener('click', (e) => {
+  if (e.target.id === 'woodfishBackdrop') closeCyberWoodfish();
+});
+
 document.addEventListener('keydown', (e) => {
   const commandBackdrop = document.getElementById('commandBackdrop');
   const commandIsOpen = commandBackdrop && !commandBackdrop.hidden;
+
+  // Exit Arcade Mode on ESC
+  if (e.key === 'Escape' && isArcadeMode) {
+    toggleArcadeMode();
+    return;
+  }
 
   // Undo (Cmd+Z or Ctrl+Z)
   if ((e.metaKey || e.ctrlKey) && !e.shiftKey && e.key.toLowerCase() === 'z') {
@@ -2981,6 +3382,7 @@ document.addEventListener('keydown', (e) => {
     const workspaceForm = document.getElementById('workspaceForm');
     if (workspaceForm && !workspaceForm.hidden) closeWorkspaceForm();
     closePersonalization();
+    closeCyberWoodfish();
   }
 });
 

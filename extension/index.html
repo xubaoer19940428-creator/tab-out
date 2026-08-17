@@ -25,6 +25,14 @@
       <div class="date" id="dateDisplay"></div>
     </div>
     <div class="header-tools">
+      <button class="header-tool-btn woodfish-tool-btn" type="button" data-action="open-woodfish" title="Cyber Woodfish (赛博木鱼 & 运势神签)" aria-label="Cyber Woodfish">
+        <span aria-hidden="true">🔮</span>
+        <span id="headerWoodfishText">赛博木鱼</span>
+      </button>
+      <button class="header-tool-btn arcade-tool-btn" type="button" data-action="toggle-arcade" title="Arcade Blast (街机激光粉碎模式)" aria-label="Arcade Mode">
+        <span aria-hidden="true">🎮</span>
+        <span id="headerArcadeText">街机粉碎</span>
+      </button>
       <button class="header-tool-btn command-btn" type="button" data-action="open-command" aria-label="Search tabs, saved items, and workspaces">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m21 21-4.35-4.35m2.1-5.4a7.5 7.5 0 1 1-15 0 7.5 7.5 0 0 1 15 0Z" /></svg>
         <span id="headerSearchText">Find anything</span>
@@ -52,6 +60,35 @@
       </button>
     </div>
   </header>
+
+  <!-- Cyber Woodfish Modal -->
+  <div class="modal-backdrop" id="woodfishBackdrop" hidden>
+    <div class="woodfish-modal" role="dialog" aria-modal="true" aria-labelledby="woodfishTitle">
+      <div class="woodfish-header">
+        <h3 id="woodfishTitle">🔮 赛博木鱼 · 极客神签</h3>
+        <button class="panel-close" type="button" data-action="close-woodfish" aria-label="Close">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" /></svg>
+        </button>
+      </div>
+      <div class="woodfish-stage" id="woodfishStage" title="敲击木鱼积攒功德！">
+        <div class="woodfish-icon" id="woodfishIcon">🪵</div>
+        <div class="woodfish-counter"><span id="woodfishCount">0</span> 功德</div>
+      </div>
+      <div class="fortune-card" id="fortuneCard">
+        <div class="fortune-badge" id="lblFortuneBadge">📜 今日极客运势</div>
+        <div class="fortune-text" id="fortuneText">敲击木鱼，解开今日天机…</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Arcade Mode HUD -->
+  <div class="arcade-hud" id="arcadeHud" style="display:none">
+    <div class="arcade-status">
+      <span class="arcade-badge">🕹️ ARCADE BLAST</span>
+      <span class="arcade-tip" id="lblArcadeTip">瞄准任意标签射击击碎！按 ESC 退出</span>
+      <button class="arcade-exit-btn" type="button" data-action="exit-arcade" id="btnExitArcade">退出 (ESC)</button>
+    </div>
+  </div>
 
   <!-- ================================================================
        TAB OUT DUPES BANNER — appears when you have extra Tab Out tabs open
@@ -201,10 +238,20 @@
           <label class="setting-toggle-item">
             <input type="checkbox" id="settingSound" name="settingSound" checked>
             <span class="toggle-copy">
-              <strong id="lblSoundTitle">Swoosh sound effect</strong>
-              <small id="lblSoundDesc">Play audio feedback when closing tabs</small>
+              <strong id="lblSoundTitle">Audio feedback</strong>
+              <small id="lblSoundDesc">Play sound when closing tabs or interacting</small>
             </span>
           </label>
+          <div class="setting-select-row" style="padding: 0 10px 10px;">
+            <span class="setting-hint" style="margin:0 0 6px; font-weight:600;" id="lblSoundPack">Sound theme:</span>
+            <select class="setting-input select-input" id="settingSoundPack">
+              <option value="swoosh">🌬️ Breeze Swoosh (默认微风)</option>
+              <option value="bubble">🫧 Bubble Pop (解压气泡)</option>
+              <option value="mech">⌨️ Mechanical Click (段落青轴)</option>
+              <option value="arcade">🎮 8-Bit Arcade (经典街机)</option>
+              <option value="laser">🗡️ Laser Slash (光剑斩击)</option>
+            </select>
+          </div>
           <label class="setting-toggle-item">
             <input type="checkbox" id="settingConfetti" name="settingConfetti" checked>
             <span class="toggle-copy">
@@ -212,6 +259,27 @@
               <small id="lblConfettiDesc">Show celebration particles on tab cleanup</small>
             </span>
           </label>
+        </div>
+      </fieldset>
+
+      <fieldset class="setting-block">
+        <legend class="setting-label" id="lblMascotSection">Desk Companion / 桌面宠物</legend>
+        <div class="setting-toggle-list">
+          <label class="setting-toggle-item">
+            <input type="checkbox" id="settingMascot" name="settingMascot" checked>
+            <span class="toggle-copy">
+              <strong id="lblMascotTitle">Enable Desk Mascot</strong>
+              <small id="lblMascotDesc">Emotion companion that reacts to your tabs</small>
+            </span>
+          </label>
+          <div class="setting-select-row" style="padding: 0 10px 10px;">
+            <span class="setting-hint" style="margin:0 0 6px; font-weight:600;" id="lblMascotType">Mascot avatar:</span>
+            <select class="setting-input select-input" id="settingMascotType">
+              <option value="cat">🐱 Orange Kitty (橘喵喵)</option>
+              <option value="bot">🤖 Cyber Bot (赛博波特)</option>
+              <option value="dog">🐶 Shiba Inu (开心柴柴)</option>
+            </select>
+          </div>
         </div>
       </fieldset>
 
@@ -247,6 +315,20 @@
     </form>
   </section>
 </div>
+
+<!-- ================================================================
+     DESK MASCOT — Playful emotion companion
+     ================================================================ -->
+<aside class="mascot-island" id="mascotIsland" aria-label="Desk Mascot">
+  <div class="mascot-bubble" id="mascotBubble">
+    <span class="mascot-bubble-text" id="mascotBubbleText">活在当下，桌面真整洁 ✨</span>
+    <button class="mascot-quick-action" id="mascotQuickAction" type="button" style="display:none"></button>
+  </div>
+  <div class="mascot-stage" id="mascotStage" title="点击摸摸我 / Click to pet!">
+    <div class="mascot-character" id="mascotCharacter">🐱</div>
+    <div class="mascot-shadow"></div>
+  </div>
+</aside>
 
 <!-- Command palette — ⌘K / Ctrl+K -->
 <div class="command-backdrop" id="commandBackdrop" hidden>

@@ -10,11 +10,16 @@ Tab Out 是一款轻量优雅的 Chrome 标签页管理扩展（基于 Manifest 
 
 ## ✨ Features / 核心功能
 
+- 🐱 **Desk Mascot / 桌面情绪像素宠物**：Smart companion (Cat, Bot, Shiba Inu) with dynamic emotions responding to tab counts and audio playback. Poke to jump & purr!
+- 🔮 **Cyber Woodfish & Zen Oracle / 赛博木鱼与每日神签**：Hollow resonant woodfish with floating merits (`功德+1`, `Bug-1`, `内存+256MB`) and daily geek fortune cookies.
+- 🎮 **Arcade Blast Mode / 街机激光粉碎**：Enter arcade mode to fire laser beams and blast away tabs with 8-bit explosions!
+- 🎵 **5 HiFi Sound Packs / 5大解压音效工坊**：Pure Web Audio synthesized soundscapes (Breeze Swoosh, Bubble Pop, Mechanical Click, 8-Bit Arcade, Laser Slash).
+- 💥 **Black Hole Collapse / 黑洞引力坍缩**：Smooth gravity collapse animations when cards are closed.
 - 🗂️ **Domain Grouping / 域名自动聚合**：See all your tabs at a glance on a clean grid, grouped by domain.
 - ↩️ **Undo Last Closed (⌘Z) / 撤销防手滑**：Accidentally closed a tab or a whole domain card? Press `⌘Z` / `Ctrl+Z` or click the Toast floating island to instantly restore pages.
 - 📂 **Card Accordion / 长标签智能折叠**：Domain cards with >4 tabs automatically collapse with an interactive "+N more" capsule, maintaining a neat Bento layout.
 - 🏠 **Homepages Card / 常用主页分组**：Pulls Gmail, X (Twitter), YouTube, LinkedIn, and GitHub homepages into a top card for quick decluttering.
-- 🎉 **Close with Style / 优雅关闭反馈**：Web Audio swoosh sound + confetti burst when closing tabs (sound & motion toggleable in settings).
+- 🎉 **Close with Style / 优雅关闭反馈**：Web Audio sound feedback + confetti burst when closing tabs (sound & motion toggleable in settings).
 - 🧹 **Duplicate Detection / 重复标签检测**：Flags tabs opened more than once with a `(2x)` badge and provides one-click cleanup.
 - 🌐 **Multi-Language Support / 中英双语切换**：Seamlessly switches between Simplified Chinese (简体中文) and English (US).
 - 🔊 **Audio & Mute Control / 发声感知与一键静音**：Identifies tabs playing audio and lets you mute/unmute with a single click.
@@ -53,7 +58,7 @@ cd tab-out
 | :--- | :--- |
 | `⌘Z` / `Ctrl+Z` | Undo Closed Tabs / 撤销最近关闭的标签或卡片 |
 | `⌘K` / `Ctrl+K` | Open Command Palette / 打开全局指令与搜索面板 |
-| `Esc` | Close Drawer or Command Palette / 关闭面板或抽屉 |
+| `Esc` | Close Drawer, Modal, or Exit Arcade / 关闭面板或退出街机 |
 | `↑` / `↓` | Navigate Command Results / 切换选中的搜索项 |
 | `Enter` | Jump to tab or restore workspace / 跳转到标签或恢复工作区 |
 
