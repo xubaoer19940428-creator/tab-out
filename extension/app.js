@@ -47,6 +47,11 @@ const I18N = {
     tabSaved: '已收藏至稍后阅读',
     tabMuted: '标签已静音',
     tabUnmuted: '标签已取消静音',
+    undo: '撤销',
+    undoShortcut: '撤销 ⌘Z',
+    tabRestored: '已成功恢复关闭的标签',
+    expandMore: '展开其余 {count} 个标签 ▾',
+    collapse: '收起 ▴',
     discardedTooltip: '已休眠 (节省内存)',
     muteTooltip: '静音此标签',
     unmuteTooltip: '取消静音',
@@ -98,6 +103,11 @@ const I18N = {
     tabSaved: 'Saved for later',
     tabMuted: 'Tab muted',
     tabUnmuted: 'Tab unmuted',
+    undo: 'Undo',
+    undoShortcut: 'Undo ⌘Z',
+    tabRestored: 'Tabs restored successfully',
+    expandMore: 'Show {count} more ▾',
+    collapse: 'Collapse ▴',
     discardedTooltip: 'Sleeping to save RAM',
     muteTooltip: 'Mute this tab',
     unmuteTooltip: 'Unmute tab',
@@ -149,6 +159,63 @@ let commandTrigger = null;
 let workspaceFormTrigger = null;
 let localWorkspaceQueue = Promise.resolve();
 let commandInertElements = [];
+
+// Undo history and Accordion state
+const lastClosedBatches = [];
+const expandedDomainKeys = new Set();
+let toastTimeoutId = null;
+
+function recordClosedTabs(tabs) {
+  if (!tabs || tabs.length === 0) return;
+  lastClosedBatches.push(tabs.map(t => ({
+    url: t.url,
+    title: t.title || t.url,
+    windowId: t.windowId,
+  })));
+  if (lastClosedBatches.length > 20) lastClosedBatches.shift();
+}
+
+async function undoLastClosed() {
+  if (lastClosedBatches.length === 0) {
+    if (chrome.sessions && typeof chrome.sessions.restore === 'function') {
+      try {
+        await chrome.sessions.restore();
+        showToast(t('tabRestored'));
+        await renderStaticDashboard();
+        return;
+      } catch {}
+    }
+    return;
+  }
+
+  const batch = lastClosedBatches.pop();
+
+  if (chrome.sessions && typeof chrome.sessions.restore === 'function') {
+    try {
+      for (let i = 0; i < batch.length; i++) {
+        await chrome.sessions.restore();
+      }
+    } catch {}
+  }
+
+  const currentTabs = await chrome.tabs.query({});
+  const currentUrlSet = new Set(currentTabs.map(t => t.url));
+
+  for (const item of batch) {
+    if (item.url && !currentUrlSet.has(item.url)) {
+      try {
+        await chrome.tabs.create({ url: item.url, active: false });
+        currentUrlSet.add(item.url);
+      } catch (err) {
+        console.warn('[tab-out] Could not reopen tab:', item.url, err);
+      }
+    }
+  }
+
+  hideToast();
+  showToast(t('tabRestored'));
+  await renderStaticDashboard();
+}
 
 /**
  * fetchOpenTabs()
@@ -737,16 +804,36 @@ function animateCardOut(card) {
   }, 300);
 }
 
-/**
- * showToast(message)
- *
- * Brief pop-up notification at the bottom of the screen.
- */
-function showToast(message) {
+function showToast(message, options = {}) {
   const toast = document.getElementById('toast');
-  document.getElementById('toastText').textContent = message;
+  const textEl = document.getElementById('toastText');
+  const actionBtn = document.getElementById('toastActionBtn');
+  if (!toast || !textEl) return;
+
+  if (toastTimeoutId) clearTimeout(toastTimeoutId);
+
+  textEl.textContent = message;
+
+  if (options.actionText && typeof options.onAction === 'function') {
+    actionBtn.textContent = options.actionText;
+    actionBtn.style.display = 'inline-flex';
+    actionBtn.onclick = (e) => {
+      e.stopPropagation();
+      options.onAction();
+    };
+  } else if (actionBtn) {
+    actionBtn.style.display = 'none';
+    actionBtn.onclick = null;
+  }
+
   toast.classList.add('visible');
-  setTimeout(() => toast.classList.remove('visible'), 2500);
+  toastTimeoutId = setTimeout(() => hideToast(), options.duration || 4500);
+}
+
+function hideToast() {
+  const toast = document.getElementById('toast');
+  if (toast) toast.classList.remove('visible');
+  if (toastTimeoutId) clearTimeout(toastTimeoutId);
 }
 
 /**
@@ -1816,7 +1903,7 @@ function renderDomainCard(group) {
   </span>`;
 
   const dupeBadge = hasDupes
-    ? `<span class="open-tabs-badge" style="color:var(--accent-amber);background:rgba(200,113,58,0.08);">
+    ? `<span class="open-tabs-badge dupe-badge">
         ${t('duplicates', { count: totalExtras })}
       </span>`
     : '';
@@ -1828,12 +1915,13 @@ function renderDomainCard(group) {
     if (!seen.has(tab.url)) { seen.add(tab.url); uniqueTabs.push(tab); }
   }
 
-  const visibleTabs = uniqueTabs.slice(0, 8);
-  const extraCount  = uniqueTabs.length - visibleTabs.length;
+  const isExpanded = expandedDomainKeys.has(group.domain);
+  const maxInitialCount = 4;
+  const shouldCollapse = uniqueTabs.length > maxInitialCount;
+  const displayedTabs = (shouldCollapse && !isExpanded) ? uniqueTabs.slice(0, maxInitialCount) : uniqueTabs;
 
-  const pageChips = visibleTabs.map(tab => {
+  const pageChips = displayedTabs.map(tab => {
     let label = cleanTitle(smartTitle(stripTitleNoise(tab.title || ''), tab.url), group.domain);
-    // For localhost tabs, prepend port number so you can tell projects apart
     try {
       const parsed = new URL(tab.url);
       if (parsed.hostname === 'localhost' && parsed.port) label = `${parsed.port} ${label}`;
@@ -1866,7 +1954,15 @@ function renderDomainCard(group) {
         </button>
       </div>
     </div>`;
-  }).join('') + (extraCount > 0 ? buildOverflowChips(uniqueTabs.slice(8), urlCounts) : '');
+  }).join('');
+
+  let expandToggleHtml = '';
+  if (shouldCollapse) {
+    const hiddenCount = uniqueTabs.length - maxInitialCount;
+    expandToggleHtml = isExpanded
+      ? `<button class="chip-expand-btn is-expanded" type="button" data-action="toggle-card-accordion" data-domain-key="${escapeHtml(group.domain)}"><span>${t('collapse')}</span></button>`
+      : `<button class="chip-expand-btn" type="button" data-action="toggle-card-accordion" data-domain-key="${escapeHtml(group.domain)}"><span>${t('expandMore', { count: hiddenCount })}</span></button>`;
+  }
 
   let actionsHtml = `
     <button class="action-btn close-tabs" data-action="close-domain-tabs" data-domain-id="${stableId}">
@@ -1882,21 +1978,26 @@ function renderDomainCard(group) {
       </button>`;
   }
 
+  const domainFaviconMarkup = isLanding
+    ? `<span class="domain-title-icon" aria-hidden="true">🏠</span>`
+    : faviconMarkup(tabs[0]?.url || 'https://' + group.domain, group.domain, 'favicon-domain-title', hasRealFavicon(tabs[0]?.favIconUrl));
+
   return `
     <div class="mission-card domain-card ${hasDupes ? 'has-amber-bar' : 'has-neutral-bar'}" data-domain-id="${stableId}">
       <div class="status-bar"></div>
       <div class="mission-content">
         <div class="mission-top">
-          <span class="mission-name">${isLanding ? (getCurrentLanguage() === 'zh-CN' ? '常用主页' : 'Homepages') : (group.label || friendlyDomain(group.domain))}</span>
-          ${tabBadge}
-          ${dupeBadge}
+          <div class="mission-title-row">
+            ${domainFaviconMarkup}
+            <span class="mission-name">${isLanding ? (getCurrentLanguage() === 'zh-CN' ? '常用主页' : 'Homepages') : (group.label || friendlyDomain(group.domain))}</span>
+          </div>
+          <div class="mission-badges">
+            ${tabBadge}
+            ${dupeBadge}
+          </div>
         </div>
-        <div class="mission-pages">${pageChips}</div>
+        <div class="mission-pages">${pageChips}${expandToggleHtml}</div>
         <div class="actions">${actionsHtml}</div>
-      </div>
-      <div class="mission-meta">
-        <div class="mission-page-count">${tabCount}</div>
-        <div class="mission-page-label">tabs</div>
       </div>
     </div>`;
 }
@@ -2306,16 +2407,34 @@ document.addEventListener('click', async (e) => {
     return;
   }
 
+  // ---- Expand / Collapse Card Accordion ----
+  if (action === 'toggle-card-accordion') {
+    e.stopPropagation();
+    const domainKey = actionEl.dataset.domainKey;
+    if (domainKey) {
+      if (expandedDomainKeys.has(domainKey)) {
+        expandedDomainKeys.delete(domainKey);
+      } else {
+        expandedDomainKeys.add(domainKey);
+      }
+      await renderStaticDashboard();
+    }
+    return;
+  }
+
   // ---- Close a single tab ----
   if (action === 'close-single-tab') {
     e.stopPropagation(); // don't trigger parent chip's focus-tab
     const tabUrl = actionEl.dataset.tabUrl;
     if (!tabUrl) return;
 
-    // Close the tab in Chrome directly
+    // Record tab before closing for Undo
     const allTabs = await chrome.tabs.query({});
     const match   = allTabs.find(t => t.url === tabUrl);
-    if (match) await chrome.tabs.remove(match.id);
+    if (match) {
+      recordClosedTabs([match]);
+      await chrome.tabs.remove(match.id);
+    }
     await fetchOpenTabs();
 
     playCloseSound();
@@ -2331,8 +2450,6 @@ document.addEventListener('click', async (e) => {
       setTimeout(() => {
         chip.remove();
         // If the card now has no tabs, remove it too
-        const parentCard = document.querySelector('.mission-card:has(.mission-pages:empty)');
-        if (parentCard) animateCardOut(parentCard);
         document.querySelectorAll('.mission-card').forEach(c => {
           if (c.querySelectorAll('.page-chip[data-action="focus-tab"]').length === 0) {
             animateCardOut(c);
@@ -2341,7 +2458,7 @@ document.addEventListener('click', async (e) => {
       }, 200);
     }
 
-    showToast('Tab closed');
+    showToast(t('tabClosed'), { actionText: t('undoShortcut'), onAction: undoLastClosed });
     return;
   }
 
@@ -2376,7 +2493,7 @@ document.addEventListener('click', async (e) => {
       setTimeout(() => chip.remove(), 200);
     }
 
-    showToast('Saved for later');
+    showToast(t('tabSaved'));
     await renderDeferredColumn();
     return;
   }
@@ -2429,9 +2546,11 @@ document.addEventListener('click', async (e) => {
     });
     if (!group) return;
 
+    if (group.tabs && group.tabs.length > 0) {
+      recordClosedTabs(group.tabs);
+    }
+
     const urls      = group.tabs.map(t => t.url);
-    // Landing pages and custom groups (whose domain key isn't a real hostname)
-    // must use exact URL matching to avoid closing unrelated tabs
     const useExact  = group.domain === '__landing-pages__' || !!group.label;
 
     if (useExact) {
@@ -2449,8 +2568,8 @@ document.addEventListener('click', async (e) => {
     const idx = domainGroups.indexOf(group);
     if (idx !== -1) domainGroups.splice(idx, 1);
 
-    const groupLabel = group.domain === '__landing-pages__' ? 'Homepages' : (group.label || friendlyDomain(group.domain));
-    showToast(`Closed ${urls.length} tab${urls.length !== 1 ? 's' : ''} from ${groupLabel}`);
+    const groupLabel = group.domain === '__landing-pages__' ? (getCurrentLanguage() === 'zh-CN' ? '常用主页' : 'Homepages') : (group.label || friendlyDomain(group.domain));
+    showToast(`${t('tabClosed')} (${urls.length} · ${groupLabel})`, { actionText: t('undoShortcut'), onAction: undoLastClosed });
 
     return;
   }
@@ -2460,6 +2579,20 @@ document.addEventListener('click', async (e) => {
     const urlsEncoded = actionEl.dataset.dupeUrls || '';
     const urls = urlsEncoded.split(',').map(u => decodeURIComponent(u)).filter(Boolean);
     if (urls.length === 0) return;
+
+    // Find duplicates that will be closed to record for undo
+    const allTabs = await chrome.tabs.query({});
+    const urlCount = {};
+    const dupesToClose = [];
+    for (const tab of allTabs) {
+      if (urls.includes(tab.url)) {
+        urlCount[tab.url] = (urlCount[tab.url] || 0) + 1;
+        if (urlCount[tab.url] > 1) {
+          dupesToClose.push(tab);
+        }
+      }
+    }
+    if (dupesToClose.length > 0) recordClosedTabs(dupesToClose);
 
     await closeDuplicateTabs(urls, true);
     playCloseSound();
@@ -2476,26 +2609,25 @@ document.addEventListener('click', async (e) => {
         b.style.opacity    = '0';
         setTimeout(() => b.remove(), 200);
       });
-      card.querySelectorAll('.open-tabs-badge').forEach(badge => {
-        if (badge.textContent.includes('duplicate')) {
-          badge.style.transition = 'opacity 0.2s';
-          badge.style.opacity    = '0';
-          setTimeout(() => badge.remove(), 200);
-        }
+      card.querySelectorAll('.open-tabs-badge.dupe-badge').forEach(badge => {
+        badge.style.transition = 'opacity 0.2s';
+        badge.style.opacity    = '0';
+        setTimeout(() => badge.remove(), 200);
       });
       card.classList.remove('has-amber-bar');
       card.classList.add('has-neutral-bar');
     }
 
-    showToast('Closed duplicates, kept one copy each');
+    showToast(t('closeDupes', { count: urls.length }), { actionText: t('undoShortcut'), onAction: undoLastClosed });
     return;
   }
 
   // ---- Close ALL open tabs ----
   if (action === 'close-all-open-tabs') {
-    const allUrls = openTabs
-      .filter(t => t.url && !t.url.startsWith('chrome') && !t.url.startsWith('about:'))
-      .map(t => t.url);
+    const realTabs = openTabs.filter(t => t.url && !t.url.startsWith('chrome') && !t.url.startsWith('about:'));
+    if (realTabs.length > 0) recordClosedTabs(realTabs);
+
+    const allUrls = realTabs.map(t => t.url);
     await closeTabsByUrls(allUrls);
     playCloseSound();
 
@@ -2507,7 +2639,7 @@ document.addEventListener('click', async (e) => {
       animateCardOut(c);
     });
 
-    showToast('All tabs closed. Fresh start.');
+    showToast(t('tabClosed'), { actionText: t('undoShortcut'), onAction: undoLastClosed });
     return;
   }
 
@@ -2794,6 +2926,16 @@ document.getElementById('commandBackdrop')?.addEventListener('click', (e) => {
 document.addEventListener('keydown', (e) => {
   const commandBackdrop = document.getElementById('commandBackdrop');
   const commandIsOpen = commandBackdrop && !commandBackdrop.hidden;
+
+  // Undo (Cmd+Z or Ctrl+Z)
+  if ((e.metaKey || e.ctrlKey) && !e.shiftKey && e.key.toLowerCase() === 'z') {
+    const activeTag = document.activeElement ? document.activeElement.tagName.toLowerCase() : '';
+    if (activeTag !== 'input' && activeTag !== 'textarea' && !document.activeElement?.isContentEditable) {
+      e.preventDefault();
+      undoLastClosed();
+      return;
+    }
+  }
 
   if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
     e.preventDefault();

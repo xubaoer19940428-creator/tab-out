@@ -11,6 +11,8 @@ Tab Out 是一款轻量优雅的 Chrome 标签页管理扩展（基于 Manifest 
 ## ✨ Features / 核心功能
 
 - 🗂️ **Domain Grouping / 域名自动聚合**：See all your tabs at a glance on a clean grid, grouped by domain.
+- ↩️ **Undo Last Closed (⌘Z) / 撤销防手滑**：Accidentally closed a tab or a whole domain card? Press `⌘Z` / `Ctrl+Z` or click the Toast floating island to instantly restore pages.
+- 📂 **Card Accordion / 长标签智能折叠**：Domain cards with >4 tabs automatically collapse with an interactive "+N more" capsule, maintaining a neat Bento layout.
 - 🏠 **Homepages Card / 常用主页分组**：Pulls Gmail, X (Twitter), YouTube, LinkedIn, and GitHub homepages into a top card for quick decluttering.
 - 🎉 **Close with Style / 优雅关闭反馈**：Web Audio swoosh sound + confetti burst when closing tabs (sound & motion toggleable in settings).
 - 🧹 **Duplicate Detection / 重复标签检测**：Flags tabs opened more than once with a `(2x)` badge and provides one-click cleanup.
@@ -49,6 +51,7 @@ cd tab-out
 
 | Shortcut / 快捷键 | Action / 动作 |
 | :--- | :--- |
+| `⌘Z` / `Ctrl+Z` | Undo Closed Tabs / 撤销最近关闭的标签或卡片 |
 | `⌘K` / `Ctrl+K` | Open Command Palette / 打开全局指令与搜索面板 |
 | `Esc` | Close Drawer or Command Palette / 关闭面板或抽屉 |
 | `↑` / `↓` | Navigate Command Results / 切换选中的搜索项 |
