@@ -3040,89 +3040,432 @@ body.command-open { overflow: hidden; }
   transform: scale(1.15);
 }
 
+.mascot-stage {
+  position: relative;
+  width: 72px;
+  height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 180ms ease;
+}
+
+.mascot-stage:hover {
+  transform: scale(1.1);
+}
+
 .mascot-stage:active {
-  transform: scale(0.92);
+  transform: scale(0.94);
 }
 
 .mascot-character {
-  font-size: 32px;
-  line-height: 1;
-  filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.12));
-  animation: mascotIdle 3.2s ease-in-out infinite;
+  position: relative;
+  width: 64px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   transform-origin: center bottom;
+  animation: mascotBreathing 3.6s ease-in-out infinite;
 }
 
 .mascot-character.is-jumping {
-  animation: mascotFlip 550ms cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+  animation: mascotHappyJump 600ms cubic-bezier(0.34, 1.56, 0.64, 1) !important;
 }
 
-.mascot-character.is-typing {
-  animation: mascotTyping 0.6s ease-in-out infinite alternate !important;
+/* ---- Realistic Vector Cat Anatomy ---- */
+.live-cat {
+  position: relative;
+  width: 58px;
+  height: 58px;
 }
 
-.mascot-character.is-overloaded {
-  animation: mascotSweat 1.2s ease-in-out infinite !important;
+/* Ears */
+.cat-ear {
+  position: absolute;
+  top: 4px;
+  width: 16px;
+  height: 18px;
+  background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+  border-radius: 4px 14px 2px 2px;
+  z-index: 1;
+  transform-origin: bottom center;
+  transition: transform 200ms ease;
 }
 
-.mascot-character.is-dj {
-  animation: mascotDJ 0.45s ease-in-out infinite alternate !important;
+.cat-ear-left {
+  left: 6px;
+  transform: rotate(-22deg);
+  animation: earTwitchLeft 5s infinite;
 }
 
+.cat-ear-right {
+  right: 6px;
+  transform: rotate(22deg) scaleX(-1);
+  animation: earTwitchRight 6s infinite;
+}
+
+.cat-ear-inner {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 9px;
+  height: 11px;
+  background: #fecdd3;
+  border-radius: 2px 8px 2px 2px;
+}
+
+/* Head */
+.cat-head {
+  position: absolute;
+  top: 10px;
+  left: 6px;
+  width: 46px;
+  height: 38px;
+  background: radial-gradient(circle at 50% 35%, #fed7aa 0%, #f97316 65%, #ea580c 100%);
+  border-radius: 22px 22px 18px 18px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  z-index: 2;
+}
+
+/* Forehead Stripes */
+.cat-stripes {
+  position: absolute;
+  top: 2px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 6px;
+  height: 8px;
+  background: #c2410c;
+  border-radius: 0 0 3px 3px;
+  opacity: 0.6;
+}
+
+/* Eyes */
+.cat-eyes {
+  position: absolute;
+  top: 14px;
+  left: 0;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  padding: 0 9px;
+  z-index: 3;
+}
+
+.cat-eye {
+  position: relative;
+  width: 10px;
+  height: 11px;
+  background: #1e293b;
+  border-radius: 50%;
+  overflow: hidden;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.cat-pupil {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 50%, #0284c7 20%, #0f172a 80%);
+  border-radius: 50%;
+}
+
+.cat-eye-shine {
+  position: absolute;
+  top: 1.5px;
+  left: 2px;
+  width: 4px;
+  height: 4px;
+  background: #ffffff;
+  border-radius: 50%;
+  box-shadow: 2px 3px 0 1px rgba(255, 255, 255, 0.7);
+}
+
+.cat-eyelid {
+  position: absolute;
+  top: -12px;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #f97316;
+  border-radius: 50%;
+  animation: catBlink 4.2s infinite;
+}
+
+/* Blush */
+.cat-blush {
+  position: absolute;
+  top: 21px;
+  width: 8px;
+  height: 5px;
+  background: #fda4af;
+  border-radius: 50%;
+  opacity: 0.3;
+  transition: opacity 250ms ease, transform 250ms ease;
+}
+
+.cat-blush-left { left: 4px; }
+.cat-blush-right { right: 4px; }
+
+.mascot-stage:hover .cat-blush,
+.mascot-character.is-jumping .cat-blush {
+  opacity: 0.85;
+  transform: scale(1.3);
+}
+
+.mascot-stage:hover .cat-eyelid,
+.mascot-character.is-jumping .cat-eyelid {
+  top: 0;
+  height: 60%;
+}
+
+/* Muzzle, Nose & Mouth */
+.cat-muzzle {
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 4;
+}
+
+.cat-nose {
+  width: 5px;
+  height: 4px;
+  background: #f43f5e;
+  border-radius: 2px 2px 3px 3px;
+}
+
+.cat-mouth {
+  width: 8px;
+  height: 4px;
+  border-bottom: 1.5px solid #9a3412;
+  border-radius: 0 0 5px 5px;
+  margin-top: -1px;
+}
+
+/* Whiskers */
+.cat-whiskers {
+  position: absolute;
+  top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  z-index: 4;
+}
+
+.cat-whiskers span {
+  display: block;
+  width: 11px;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.85);
+  box-shadow: 0 0.5px 1px rgba(0, 0, 0, 0.15);
+}
+
+.cat-whiskers-left {
+  left: -2px;
+  transform: rotate(-5deg);
+}
+
+.cat-whiskers-right {
+  right: -2px;
+  transform: rotate(5deg) scaleX(-1);
+}
+
+/* Body & Chest */
+.cat-body {
+  position: absolute;
+  top: 36px;
+  left: 11px;
+  width: 36px;
+  height: 20px;
+  background: linear-gradient(180deg, #f97316 0%, #ea580c 100%);
+  border-radius: 12px 12px 14px 14px;
+  z-index: 1;
+}
+
+.cat-chest {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 18px;
+  height: 14px;
+  background: #ffedd5;
+  border-radius: 50%;
+}
+
+/* Paws */
+.cat-paws {
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  padding: 0 4px;
+  z-index: 5;
+}
+
+.cat-paw {
+  width: 10px;
+  height: 7px;
+  background: #ffedd5;
+  border: 1px solid #ea580c;
+  border-radius: 5px;
+}
+
+/* Tail */
+.cat-tail {
+  position: absolute;
+  bottom: 6px;
+  right: 0px;
+  width: 18px;
+  height: 24px;
+  z-index: 0;
+  transform-origin: bottom left;
+  animation: catTailWag 2.8s ease-in-out infinite;
+}
+
+.cat-tail-path {
+  width: 6px;
+  height: 22px;
+  background: linear-gradient(180deg, #ea580c 0%, #f97316 70%, #ffedd5 100%);
+  border-radius: 6px 6px 0 0;
+  transform: rotate(25deg);
+}
+
+/* DJ Headphones */
+.cat-headphone {
+  position: absolute;
+  top: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 48px;
+  height: 30px;
+  z-index: 10;
+  display: none;
+}
+
+.is-dj .cat-headphone {
+  display: block;
+}
+
+.headphone-band {
+  width: 100%;
+  height: 20px;
+  border: 3.5px solid #38bdf8;
+  border-bottom: transparent;
+  border-radius: 24px 24px 0 0;
+  box-shadow: 0 0 8px #38bdf8;
+}
+
+.headphone-earpad {
+  position: absolute;
+  top: 12px;
+  width: 9px;
+  height: 14px;
+  background: #f43f5e;
+  border-radius: 4px;
+  box-shadow: 0 0 8px #f43f5e;
+}
+
+.headphone-left { left: 0; }
+.headphone-right { right: 0; }
+
+/* Sweat drop in overloaded state */
+.cat-sweat {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  font-size: 14px;
+  z-index: 10;
+  display: none;
+  animation: sweatDrop 1s infinite alternate;
+}
+
+.is-overloaded .cat-sweat {
+  display: block;
+}
+
+.is-overloaded .cat-ear-left {
+  transform: rotate(-45deg);
+}
+.is-overloaded .cat-ear-right {
+  transform: rotate(45deg) scaleX(-1);
+}
+
+.is-typing .cat-head {
+  animation: catHeadBob 0.3s ease-in-out infinite alternate;
+}
+
+.is-dj .cat-head {
+  animation: catDJBob 0.45s ease-in-out infinite alternate;
+}
+
+/* Shadow */
 .mascot-shadow {
   position: absolute;
-  bottom: 2px;
-  width: 28px;
-  height: 6px;
-  background: rgba(0, 0, 0, 0.12);
+  bottom: 0px;
+  width: 44px;
+  height: 8px;
+  background: rgba(0, 0, 0, 0.16);
   border-radius: 50%;
-  filter: blur(1px);
-  animation: mascotShadow 3.2s ease-in-out infinite;
+  filter: blur(2px);
+  animation: mascotShadow 3.6s ease-in-out infinite;
 }
 
-.mascot-particle {
-  position: fixed;
-  pointer-events: none;
-  font-size: 18px;
-  z-index: 1000;
-  animation: floatParticle 900ms ease-out forwards;
+/* ---- Living Animations ---- */
+@keyframes mascotBreathing {
+  0%, 100% { transform: translateY(0) scale(1, 1); }
+  50% { transform: translateY(-3px) scale(1.02, 0.98); }
 }
 
-@keyframes mascotIdle {
-  0%, 100% { transform: translateY(0) rotate(0deg); }
-  50% { transform: translateY(-4px) rotate(-2deg); }
+@keyframes catBlink {
+  0%, 94%, 100% { top: -12px; }
+  96%, 98% { top: 0; }
 }
 
-@keyframes mascotShadow {
-  0%, 100% { transform: scale(1); opacity: 0.15; }
-  50% { transform: scale(0.8); opacity: 0.08; }
+@keyframes catTailWag {
+  0%, 100% { transform: rotate(-10deg); }
+  50% { transform: rotate(24deg) scaleY(1.05); }
 }
 
-@keyframes mascotFlip {
-  0% { transform: scale(1) translateY(0) rotate(0deg); }
-  40% { transform: scale(1.25) translateY(-22px) rotate(-180deg); }
-  75% { transform: scale(1.1) translateY(-6px) rotate(-360deg); }
-  100% { transform: scale(1) translateY(0) rotate(-360deg); }
+@keyframes earTwitchLeft {
+  0%, 92%, 100% { transform: rotate(-22deg); }
+  94% { transform: rotate(-35deg); }
+  96% { transform: rotate(-18deg); }
 }
 
-@keyframes mascotTyping {
-  0% { transform: translateY(0) rotate(-4deg) scaleX(1.05); }
-  100% { transform: translateY(-2px) rotate(4deg) scaleX(0.95); }
+@keyframes earTwitchRight {
+  0%, 90%, 100% { transform: rotate(22deg) scaleX(-1); }
+  92% { transform: rotate(35deg) scaleX(-1); }
+  94% { transform: rotate(18deg) scaleX(-1); }
 }
 
-@keyframes mascotSweat {
-  0%, 100% { transform: translateY(0) rotate(-2deg); }
-  25% { transform: translateY(-2px) rotate(2deg); }
-  75% { transform: translateY(1px) rotate(-4deg); }
+@keyframes mascotHappyJump {
+  0% { transform: translateY(0) scale(1); }
+  35% { transform: translateY(-24px) scale(1.15) rotate(-6deg); }
+  65% { transform: translateY(-8px) scale(1.08) rotate(4deg); }
+  100% { transform: translateY(0) scale(1) rotate(0deg); }
 }
 
-@keyframes mascotDJ {
-  0% { transform: translateY(0) rotate(-6deg) scale(1); }
-  100% { transform: translateY(-5px) rotate(6deg) scale(1.08); }
+@keyframes catHeadBob {
+  0% { transform: translateY(0) rotate(-2deg); }
+  100% { transform: translateY(-2px) rotate(2deg); }
 }
 
-@keyframes bubblePop {
-  0% { opacity: 0; transform: scale(0.6) translateY(8px); }
-  100% { opacity: 1; transform: scale(1) translateY(0); }
+@keyframes catDJBob {
+  0% { transform: translateY(0) rotate(-5deg) scale(1); }
+  100% { transform: translateY(-4px) rotate(5deg) scale(1.06); }
+}
+
+@keyframes sweatDrop {
+  0% { transform: translateY(0); opacity: 0.7; }
+  100% { transform: translateY(4px); opacity: 1; }
 }
 
 @keyframes floatParticle {

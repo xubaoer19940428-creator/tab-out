@@ -814,14 +814,6 @@ function updateMascotState() {
   }
   island.classList.remove('is-hidden');
 
-  const avatarType = preferences?.mascotType || 'cat';
-  const avatarIcons = {
-    cat: { default: '🐱', chill: '☕🐱', busy: '💻🐱', overloaded: '📚🐱', dj: '🎧🐱' },
-    bot: { default: '🤖', chill: '🔋🤖', busy: '⚡🤖', overloaded: '🔥🤖', dj: '🎵🤖' },
-    dog: { default: '🐶', chill: '🦴🐶', busy: '🎾🐶', overloaded: '📦🐶', dj: '🎧🐶' },
-  };
-  const icons = avatarIcons[avatarType] || avatarIcons.cat;
-
   const tabCount = openTabs.filter(t => !t.isTabOut).length;
   const isPlayingAudio = openTabs.some(t => t.audible);
 
@@ -831,18 +823,14 @@ function updateMascotState() {
   if (isPlayingAudio) {
     state = 'dj';
     charEl.classList.add('is-dj');
-    charEl.textContent = icons.dj;
   } else if (tabCount > 18) {
     state = 'overloaded';
     charEl.classList.add('is-overloaded');
-    charEl.textContent = icons.overloaded;
   } else if (tabCount >= 7) {
     state = 'busy';
     charEl.classList.add('is-typing');
-    charEl.textContent = icons.busy;
   } else {
     state = 'chill';
-    charEl.textContent = icons.chill;
   }
 
   if (bubbleText) {
