@@ -37,6 +37,7 @@ const I18N = {
     closeDupes: '清理 {count} 个重复标签',
     tabOpen: '{count} 个标签打开',
     duplicates: '{count} 个重复项',
+    domainCount: '{count} 个域名',
     freezeInactive: '释放内存 (休眠后台标签)',
     freezeDone: '已休眠 {count} 个后台标签以释放 RAM 内存',
     exportSuccess: '工作区与配置已成功导出为 JSON',
@@ -87,6 +88,7 @@ const I18N = {
     closeDupes: 'Close {count} duplicates',
     tabOpen: '{count} tabs open',
     duplicates: '{count} duplicates',
+    domainCount: '{count} domains',
     freezeInactive: 'Free up memory (Freeze inactive tabs)',
     freezeDone: 'Suspended {count} inactive background tabs to save RAM',
     exportSuccess: 'Workspaces and links exported successfully',
@@ -823,6 +825,19 @@ function updateStaticI18n() {
 
   const dateDisplay = document.getElementById('dateDisplay');
   if (dateDisplay) dateDisplay.textContent = getDateDisplay();
+
+  const clockLabel = document.querySelector('.clock-card span');
+  if (clockLabel) clockLabel.textContent = t('localTime');
+
+  const weatherTemp = document.getElementById('weatherTemperature');
+  if (weatherTemp && (!preferences || !preferences.city)) {
+    weatherTemp.textContent = t('addWeather');
+  }
+
+  const weatherLoc = document.getElementById('weatherLocation');
+  if (weatherLoc && (!preferences || !preferences.city)) {
+    weatherLoc.textContent = t('chooseCity');
+  }
 
   const searchBtn = document.querySelector('.command-btn span');
   if (searchBtn) searchBtn.textContent = t('findAnything');
@@ -2128,8 +2143,8 @@ async function renderStaticDashboard() {
   const openTabsSectionTitle = document.getElementById('openTabsSectionTitle');
 
   if (domainGroups.length > 0 && openTabsSection) {
-    if (openTabsSectionTitle) openTabsSectionTitle.textContent = 'Open tabs';
-    openTabsSectionCount.innerHTML = `${domainGroups.length} domain${domainGroups.length !== 1 ? 's' : ''} &nbsp;&middot;&nbsp; <button class="action-btn close-tabs" data-action="close-all-open-tabs" style="font-size:11px;padding:3px 10px;">${ICONS.close} Close all ${realTabs.length} tabs</button>`;
+    if (openTabsSectionTitle) openTabsSectionTitle.textContent = t('rightNow');
+    openTabsSectionCount.innerHTML = `${t('domainCount', { count: domainGroups.length })} &nbsp;&middot;&nbsp; <button class="action-btn close-tabs" data-action="close-all-open-tabs" style="font-size:11px;padding:3px 10px;">${ICONS.close} ${t('closeAllTabs', { count: realTabs.length })}</button>`;
     openTabsMissionsEl.innerHTML = domainGroups.map(g => renderDomainCard(g)).join('');
     openTabsSection.style.display = 'block';
   } else if (openTabsSection) {
