@@ -3027,32 +3027,19 @@ body.command-open { overflow: hidden; }
 
 .mascot-stage {
   position: relative;
-  width: 54px;
-  height: 54px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: transform 180ms ease;
-}
-
-.mascot-stage:hover {
-  transform: scale(1.15);
-}
-
-.mascot-stage {
-  position: relative;
   width: 72px;
   height: 72px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
+  perspective: 700px;
+  perspective-origin: 50% 60%;
   transition: transform 180ms ease;
 }
 
 .mascot-stage:hover {
-  transform: scale(1.1);
+  transform: scale(1.12);
 }
 
 .mascot-stage:active {
@@ -3066,22 +3053,27 @@ body.command-open { overflow: hidden; }
   display: flex;
   align-items: center;
   justify-content: center;
+  transform-style: preserve-3d;
   transform-origin: center bottom;
+  /* 3D Head & Body Tracking Variables with smooth lerp */
+  transform: rotateX(var(--cat-rot-x, 0deg)) rotateY(var(--cat-rot-y, 0deg));
+  transition: transform 80ms cubic-bezier(0.2, 0.8, 0.4, 1);
   animation: mascotBreathing 3.6s ease-in-out infinite;
 }
 
 .mascot-character.is-jumping {
-  animation: mascotHappyJump 600ms cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+  animation: cat3DFlip 680ms cubic-bezier(0.34, 1.56, 0.64, 1) !important;
 }
 
-/* ---- Realistic Vector Cat Anatomy ---- */
+/* ---- 3D Spatial Vector Cat Anatomy ---- */
 .live-cat {
   position: relative;
   width: 58px;
   height: 58px;
+  transform-style: preserve-3d;
 }
 
-/* Ears */
+/* Ears - Z: 4px */
 .cat-ear {
   position: absolute;
   top: 4px;
@@ -3091,18 +3083,20 @@ body.command-open { overflow: hidden; }
   border-radius: 4px 14px 2px 2px;
   z-index: 1;
   transform-origin: bottom center;
+  transform-style: preserve-3d;
+  transform: translateZ(4px);
   transition: transform 200ms ease;
 }
 
 .cat-ear-left {
   left: 6px;
-  transform: rotate(-22deg);
+  transform: translateZ(4px) rotate(-22deg);
   animation: earTwitchLeft 5s infinite;
 }
 
 .cat-ear-right {
   right: 6px;
-  transform: rotate(22deg) scaleX(-1);
+  transform: translateZ(4px) rotate(22deg) scaleX(-1);
   animation: earTwitchRight 6s infinite;
 }
 
@@ -3114,9 +3108,10 @@ body.command-open { overflow: hidden; }
   height: 11px;
   background: #fecdd3;
   border-radius: 2px 8px 2px 2px;
+  transform: translateZ(2px);
 }
 
-/* Head */
+/* Head - Z: 12px with 3D Specular curve */
 .cat-head {
   position: absolute;
   top: 10px;
@@ -3125,16 +3120,18 @@ body.command-open { overflow: hidden; }
   height: 38px;
   background: radial-gradient(circle at 50% 35%, #fed7aa 0%, #f97316 65%, #ea580c 100%);
   border-radius: 22px 22px 18px 18px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18), inset 0 2px 4px rgba(255, 255, 255, 0.35);
+  transform-style: preserve-3d;
+  transform: translateZ(12px);
   z-index: 2;
 }
 
-/* Forehead Stripes */
+/* Forehead Stripes - Z: 14px */
 .cat-stripes {
   position: absolute;
   top: 2px;
   left: 50%;
-  transform: translateX(-50%);
+  transform: translateX(-50%) translateZ(2px);
   width: 6px;
   height: 8px;
   background: #c2410c;
@@ -3142,7 +3139,7 @@ body.command-open { overflow: hidden; }
   opacity: 0.6;
 }
 
-/* Eyes */
+/* Eyes - Z: 20px with Pupil 3D Eye Tracking */
 .cat-eyes {
   position: absolute;
   top: 14px;
@@ -3151,6 +3148,8 @@ body.command-open { overflow: hidden; }
   display: flex;
   justify-content: space-between;
   padding: 0 9px;
+  transform-style: preserve-3d;
+  transform: translateZ(20px);
   z-index: 3;
 }
 
@@ -3161,7 +3160,8 @@ body.command-open { overflow: hidden; }
   background: #1e293b;
   border-radius: 50%;
   overflow: hidden;
-  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.5);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.6);
+  transform-style: preserve-3d;
 }
 
 .cat-pupil {
@@ -3169,6 +3169,8 @@ body.command-open { overflow: hidden; }
   inset: 0;
   background: radial-gradient(circle at 50% 50%, #0284c7 20%, #0f172a 80%);
   border-radius: 50%;
+  transform: translate(var(--cat-eye-x, 0px), var(--cat-eye-y, 0px));
+  transition: transform 60ms linear;
 }
 
 .cat-eye-shine {
@@ -3180,6 +3182,7 @@ body.command-open { overflow: hidden; }
   background: #ffffff;
   border-radius: 50%;
   box-shadow: 2px 3px 0 1px rgba(255, 255, 255, 0.7);
+  transform: translateZ(4px);
 }
 
 .cat-eyelid {
@@ -3190,6 +3193,7 @@ body.command-open { overflow: hidden; }
   height: 100%;
   background: #f97316;
   border-radius: 50%;
+  transform: translateZ(3px);
   animation: catBlink 4.2s infinite;
 }
 
@@ -3220,15 +3224,16 @@ body.command-open { overflow: hidden; }
   height: 60%;
 }
 
-/* Muzzle, Nose & Mouth */
+/* Muzzle, Nose & Mouth - Z: 24px */
 .cat-muzzle {
   position: absolute;
   top: 20px;
   left: 50%;
-  transform: translateX(-50%);
+  transform: translateX(-50%) translateZ(24px);
   display: flex;
   flex-direction: column;
   align-items: center;
+  transform-style: preserve-3d;
   z-index: 4;
 }
 
@@ -3237,6 +3242,7 @@ body.command-open { overflow: hidden; }
   height: 4px;
   background: #f43f5e;
   border-radius: 2px 2px 3px 3px;
+  transform: translateZ(2px);
 }
 
 .cat-mouth {
@@ -3245,15 +3251,17 @@ body.command-open { overflow: hidden; }
   border-bottom: 1.5px solid #9a3412;
   border-radius: 0 0 5px 5px;
   margin-top: -1px;
+  transform: translateZ(1px);
 }
 
-/* Whiskers */
+/* Whiskers - Z: 26px */
 .cat-whiskers {
   position: absolute;
   top: 20px;
   display: flex;
   flex-direction: column;
   gap: 3px;
+  transform-style: preserve-3d;
   z-index: 4;
 }
 
@@ -3267,15 +3275,15 @@ body.command-open { overflow: hidden; }
 
 .cat-whiskers-left {
   left: -2px;
-  transform: rotate(-5deg);
+  transform: translateZ(26px) rotate(-5deg);
 }
 
 .cat-whiskers-right {
   right: -2px;
-  transform: rotate(5deg) scaleX(-1);
+  transform: translateZ(26px) rotate(5deg) scaleX(-1);
 }
 
-/* Body & Chest */
+/* Body & Chest - Z: 2px */
 .cat-body {
   position: absolute;
   top: 36px;
@@ -3284,6 +3292,8 @@ body.command-open { overflow: hidden; }
   height: 20px;
   background: linear-gradient(180deg, #f97316 0%, #ea580c 100%);
   border-radius: 12px 12px 14px 14px;
+  transform-style: preserve-3d;
+  transform: translateZ(2px);
   z-index: 1;
 }
 
@@ -3291,14 +3301,14 @@ body.command-open { overflow: hidden; }
   position: absolute;
   top: 0;
   left: 50%;
-  transform: translateX(-50%);
+  transform: translateX(-50%) translateZ(4px);
   width: 18px;
   height: 14px;
   background: #ffedd5;
   border-radius: 50%;
 }
 
-/* Paws */
+/* Paws - Z: 18px */
 .cat-paws {
   position: absolute;
   bottom: -2px;
@@ -3307,6 +3317,8 @@ body.command-open { overflow: hidden; }
   display: flex;
   justify-content: space-between;
   padding: 0 4px;
+  transform-style: preserve-3d;
+  transform: translateZ(18px);
   z-index: 5;
 }
 
@@ -3318,7 +3330,7 @@ body.command-open { overflow: hidden; }
   border-radius: 5px;
 }
 
-/* Tail */
+/* Tail - Z: -8px */
 .cat-tail {
   position: absolute;
   bottom: 6px;
@@ -3327,6 +3339,8 @@ body.command-open { overflow: hidden; }
   height: 24px;
   z-index: 0;
   transform-origin: bottom left;
+  transform-style: preserve-3d;
+  transform: translateZ(-8px);
   animation: catTailWag 2.8s ease-in-out infinite;
 }
 
@@ -3338,12 +3352,12 @@ body.command-open { overflow: hidden; }
   transform: rotate(25deg);
 }
 
-/* DJ Headphones */
+/* DJ Headphones - Z: 16px */
 .cat-headphone {
   position: absolute;
   top: 4px;
   left: 50%;
-  transform: translateX(-50%);
+  transform: translateX(-50%) translateZ(16px);
   width: 48px;
   height: 30px;
   z-index: 10;
@@ -3588,6 +3602,24 @@ body.command-open { overflow: hidden; }
   0%, 90%, 100% { transform: rotate(22deg) scaleX(-1); }
   92% { transform: rotate(35deg) scaleX(-1); }
   94% { transform: rotate(18deg) scaleX(-1); }
+}
+
+@keyframes cat3DFlip {
+  0% {
+    transform: rotateX(var(--cat-rot-x, 0deg)) rotateY(var(--cat-rot-y, 0deg)) translateZ(0) rotate(0deg);
+  }
+  30% {
+    transform: rotateX(-20deg) rotateY(180deg) translateZ(40px) translateY(-32px) scale(1.25);
+  }
+  60% {
+    transform: rotateX(15deg) rotateY(360deg) translateZ(20px) translateY(-10px) scale(1.1);
+  }
+  85% {
+    transform: rotateX(0deg) rotateY(360deg) translateZ(5px) translateY(2px) scale(0.96);
+  }
+  100% {
+    transform: rotateX(var(--cat-rot-x, 0deg)) rotateY(var(--cat-rot-y, 0deg)) translateZ(0) rotate(0deg);
+  }
 }
 
 @keyframes mascotHappyJump {

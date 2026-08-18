@@ -868,6 +868,76 @@ function updateMascotState() {
   }
 }
 
+/* ================================================================
+   3D SPATIAL INTERACTION & HEAD/EYE TRACKING ENGINE
+   ================================================================ */
+let catTargetRotX = 0;
+let catTargetRotY = 0;
+let catCurrentRotX = 0;
+let catCurrentRotY = 0;
+let catTargetEyeX = 0;
+let catTargetEyeY = 0;
+let catCurrentEyeX = 0;
+let catCurrentEyeY = 0;
+let isCat3DActive = true;
+
+function initCat3DTracking() {
+  const stage = document.getElementById('mascotStage');
+  const charEl = document.getElementById('mascotCharacter');
+  if (!stage || !charEl) return;
+
+  window.addEventListener('mousemove', (e) => {
+    if (!isCat3DActive) return;
+    const rect = stage.getBoundingClientRect();
+    const catCenterX = rect.left + rect.width / 2;
+    const catCenterY = rect.top + rect.height / 2;
+
+    const dx = e.clientX - catCenterX;
+    const dy = e.clientY - catCenterY;
+
+    // Calculate angles: rotateY follows X horizontal, rotateX follows Y vertical
+    const maxRotX = 22; // pitch up/down
+    const maxRotY = 32; // yaw left/right
+
+    const distanceX = dx / window.innerWidth;
+    const distanceY = dy / window.innerHeight;
+
+    catTargetRotY = Math.max(-maxRotY, Math.min(maxRotY, distanceX * maxRotY * 1.8));
+    catTargetRotX = Math.max(-maxRotX, Math.min(maxRotX, -distanceY * maxRotX * 1.8));
+
+    // Pupils parallax shift
+    catTargetEyeX = Math.max(-3.5, Math.min(3.5, distanceX * 6));
+    catTargetEyeY = Math.max(-2.5, Math.min(2.5, distanceY * 5));
+  }, { passive: true });
+
+  window.addEventListener('mouseleave', () => {
+    catTargetRotX = 0;
+    catTargetRotY = 0;
+    catTargetEyeX = 0;
+    catTargetEyeY = 0;
+  });
+
+  // 60FPS Lerp Update Loop for buttery smooth spring tracking
+  function updateCat3DLoop() {
+    const lerpFactor = 0.12;
+    catCurrentRotX += (catTargetRotX - catCurrentRotX) * lerpFactor;
+    catCurrentRotY += (catTargetRotY - catCurrentRotY) * lerpFactor;
+    catCurrentEyeX += (catTargetEyeX - catCurrentEyeX) * lerpFactor;
+    catCurrentEyeY += (catTargetEyeY - catCurrentEyeY) * lerpFactor;
+
+    if (charEl) {
+      charEl.style.setProperty('--cat-rot-x', `${catCurrentRotX.toFixed(2)}deg`);
+      charEl.style.setProperty('--cat-rot-y', `${catCurrentRotY.toFixed(2)}deg`);
+      charEl.style.setProperty('--cat-eye-x', `${catCurrentEyeX.toFixed(2)}px`);
+      charEl.style.setProperty('--cat-eye-y', `${catCurrentEyeY.toFixed(2)}px`);
+    }
+
+    requestAnimationFrame(updateCat3DLoop);
+  }
+
+  requestAnimationFrame(updateCat3DLoop);
+}
+
 async function cycleCatColor() {
   const current = preferences?.catColor || 'orange';
   const nextIdx = (CAT_COAT_COLORS.indexOf(current) + 1) % CAT_COAT_COLORS.length;
@@ -889,7 +959,7 @@ function petMascot(e) {
 
   playAudioEffect('purr');
   charEl.classList.add('is-jumping');
-  setTimeout(() => charEl.classList.remove('is-jumping'), 600);
+  setTimeout(() => charEl.classList.remove('is-jumping'), 700);
 
   mascotPetCount++;
   if (mascotPetTimer) clearTimeout(mascotPetTimer);
@@ -3418,6 +3488,7 @@ updateClock();
 setInterval(updateClock, 30 * 1000);
 loadPreferences();
 renderDashboard();
+initCat3DTracking();
 
 const commandShortcut = document.querySelector('.command-btn kbd');
 if (commandShortcut && typeof navigator !== 'undefined' && !/Mac|iPhone|iPad/.test(navigator.platform)) {
